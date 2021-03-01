@@ -1,0 +1,56 @@
+[package]
+name = "aki-resort"
+version = "0.1.0"
+authors = ["aki <aki.akaguma@hotmail.com>"]
+description = """
+sort lines of text. You can use regex to specify the KEY.
+"""
+keywords = ["text", "filter"]
+categories = ["command-line-utilities", "text-processing"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+build = "build.rs"
+edition = "2018"
+repository = "https://github.com/aki-akaguma/aki-resort"
+
+[lib]
+name = "libaki_resort"
+path = "src/lib.rs"
+crate-type = ["lib"]
+
+[[bin]]
+name = "aki-resort"
+path = "src/main.rs"
+
+[features]
+default = []
+
+[dependencies]
+lazy_static = "1.4"
+regex = "1.4"
+anyhow = "1.0"
+flood-tide = { version="0.1", default-features=true, features=["stop_at_mm"] }
+runnel = "0.3"
+
+[dev-dependencies]
+
+[build-dependencies]
+rustc_version = "=0.2.3"
+
+[workspace]
+members = [
+    "xtask",
+]
+
+[package.metadata.deb]
+features = []
+section = "AAA-text"
+priority = "optional"
+maintainer = "aki <aki.akaguma@hotmail.com>"
+extended-description = """\
+This program sort lines of text. You can use regex to specify the KEY.
+"""
+depends = "$auto"
+assets = [
+    ["target/release/aki-resort", "usr/bin/aki-resort", "755"],
+]
