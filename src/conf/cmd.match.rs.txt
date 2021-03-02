@@ -6,8 +6,8 @@ match CmdOp::from(nv.opt.num) {
     CmdOp::AccordingTo => {
         conf.opt_according_to = value_to_opt_according_to_word(nv)?;
     }
-    CmdOp::Regex => {
-        conf.opt_regex = value_to_string(nv)?;
+    CmdOp::Exp => {
+        conf.opt_exp = value_to_string(nv)?;
     }
     CmdOp::Key => {
         conf.opt_key = value_to_string(nv)?;

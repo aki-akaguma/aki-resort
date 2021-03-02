@@ -12,3 +12,5 @@
 - [ ] option: --field-separator <sep>
 - [ ] option: -u, --unique
 - [X] option: --max-buffer <size>
+- [ ] add glob match
+- [ ] add plain match

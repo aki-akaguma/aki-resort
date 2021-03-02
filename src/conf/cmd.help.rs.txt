@@ -4,14 +4,14 @@ const OPTIONS_TEXT: &str = r"Ordering options:
       --according-to <word>     sort according to WORD: string, numeric, month, version
 
 Other options:
-  -e, --regex <exp>             regular expression. sort via this match point.
+  -e, --exp <exp>               regular expression. sort via this match point.
   -k, --key <keydef>            sort via a key. keydef gives location.
       --field-separator <sep>   use <sep> instead of non-blank to blank transition
   -u, --unique                  output only the first line of an equal.
       --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
 
-  -H, --help     display this help and exit
-  -V, --version  display version information and exit
+  -H, --help        display this help and exit
+  -V, --version     display version information and exit
 ";
 
 #[repr(u8)]
@@ -19,7 +19,7 @@ Other options:
 enum CmdOp {
     Reverse,
     AccordingTo,
-    Regex,
+    Exp,
     Key,
     FieldSeparator,
     Unique,
@@ -42,11 +42,11 @@ impl CmdOp {
 #[rustfmt::skip]
 const OPT_ARY: [Opt;9] = [
     Opt { sho: 0u8,  lon: "according-to",  has: Arg::Yes, num: CmdOp::AccordingTo.to(), },
+    Opt { sho: b'e', lon: "exp",           has: Arg::Yes, num: CmdOp::Exp.to(), },
     Opt { sho: 0u8,  lon: "field-separator",has: Arg::Yes, num: CmdOp::FieldSeparator.to(), },
     Opt { sho: b'H', lon: "help",          has: Arg::No,  num: CmdOp::Help.to(), },
     Opt { sho: b'k', lon: "key",           has: Arg::Yes, num: CmdOp::Key.to(), },
     Opt { sho: 0u8,  lon: "max-buffer",    has: Arg::Yes, num: CmdOp::MaxBuffer.to(), },
-    Opt { sho: b'e', lon: "regex",         has: Arg::Yes, num: CmdOp::Regex.to(), },
     Opt { sho: b'r', lon: "reverse",       has: Arg::No,  num: CmdOp::Reverse.to(), },
     Opt { sho: b'u', lon: "unique",        has: Arg::No,  num: CmdOp::Unique.to(), },
     Opt { sho: b'V', lon: "version",       has: Arg::No,  num: CmdOp::Version.to(), },
@@ -54,7 +54,7 @@ const OPT_ARY: [Opt;9] = [
 
 #[rustfmt::skip]
 const OPT_ARY_SHO_IDX: [(u8,usize);6] = [
-(b'H',2),(b'V',8),(b'e',5),(b'k',3),(b'r',6),(b'u',7),];
+(b'H',3),(b'V',8),(b'e',1),(b'k',4),(b'r',6),(b'u',7),];
 
 #[derive(Debug, Default, PartialEq)]
 pub struct CmdOptConf {
@@ -62,7 +62,7 @@ pub struct CmdOptConf {
     //
     pub flg_reverse: bool,
     pub opt_according_to: OptAccordingToWord,
-    pub opt_regex: String,
+    pub opt_exp: String,
     pub opt_key: String,
     pub opt_field_separator: String,
     pub flg_unique: bool,
