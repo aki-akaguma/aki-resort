@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "aki-resort"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "flood-tide",
@@ -41,9 +41,9 @@ checksum = "301babf76cda470515c6b7cdc4730662d3f47a9dccda58d53145f2a7a89e42ed"
 
 [[package]]
 name = "flood-tide-gen"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "18c515753d8e949a242d6ddd0b2509dad02f83b715a42070d4e8fda6ed4ca375"
+checksum = "90af46a8a10c1da60a26e40b7aa59ff78d3f4099f72a790cf164914b459d7516"
 dependencies = [
  "anyhow",
  "case",
@@ -64,9 +64,9 @@ checksum = "0ee1c47aaa256ecabcaea351eae4a9b01ef39ed810004e298d2511ed284b1525"
 
 [[package]]
 name = "once_cell"
-version = "1.7.0"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10acf907b94fc1b1a152d08ef97e7759650268cf986bf127f387e602b02c7e5a"
+checksum = "af8b08b04175473088b46763e51ee54da5f9a164bc162f615b91bc179dbf15a3"
 
 [[package]]
 name = "regex"

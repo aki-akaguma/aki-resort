@@ -9,8 +9,8 @@ use runnel::RunnelIoe;
 use std::io::{BufRead, Write};
 
 pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
-    let re = if !conf.opt_regex.is_empty() {
-        let re = Regex::new(conf.opt_regex.as_str())?;
+    let re = if !conf.opt_exp.is_empty() {
+        let re = Regex::new(conf.opt_exp.as_str())?;
         Some(re)
     } else {
         None

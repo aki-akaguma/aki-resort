@@ -14,20 +14,17 @@ include!("cmd.help.rs.txt");
 const DESCRIPTIONS_TEXT: &str = r#"
 sort lines of text.
 "#;
-const ARGUMENTS_TEXT: &str = r#""#;
-const EXAMPLES_TEXT: &str = r#""#;
 /*
 const ARGUMENTS_TEXT: &str = r#"Argument:
   <url>                     url to getting, protocol is http or ftp
 "#;
-
-const EXAMPLES_TEXT: &str = r#"Examples:
-  You  can specify multiple URLs or parts of URLs by writing part sets within braces as in:
-    curl "http://site.{one,two,three}.comn"
-  you can get sequences of alphanumeric series by using [] as in:
-    curl "ftp://ftp.example.com/file[1-100].txt"
-"#;
 */
+const EXAMPLES_TEXT: &str = r#"Examples:
+  This sort via utf-8 code:
+    cat file1.txt | aki-resort
+  This sort via 1st chunk of numeric character according to numeric:
+    cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
+"#;
 //}}} TEXT
 
 //----------------------------------------------------------------------
@@ -46,8 +43,7 @@ fn usage_message(program: &str) -> String {
 fn help_message(program: &str) -> String {
     let ver = version_message(program);
     let usa = usage_message(env!("CARGO_PKG_NAME"));
-    [ &ver, "", &usa, DESCRIPTIONS_TEXT, OPTIONS_TEXT,
-        ARGUMENTS_TEXT, EXAMPLES_TEXT].join("\n")
+    [ &ver, "", &usa, DESCRIPTIONS_TEXT, OPTIONS_TEXT, EXAMPLES_TEXT].join("\n")
 }
 
 //----------------------------------------------------------------------

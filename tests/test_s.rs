@@ -13,16 +13,20 @@ macro_rules! help_msg {
             "      --according-to <word>     sort according to WORD: string, numeric, month, version\n",
             "\n",
             "Other options:\n",
-            "  -e, --regex <exp>             regular expression. sort via this match point.\n",
+            "  -e, --exp <exp>               regular expression. sort via this match point.\n",
             "  -k, --key <keydef>            sort via a key. keydef gives location.\n",
             "      --field-separator <sep>   use <sep> instead of non-blank to blank transition\n",
             "  -u, --unique                  output only the first line of an equal.\n",
             "      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.\n",
             "\n",
-            "  -H, --help     display this help and exit\n",
-            "  -V, --version  display version information and exit\n",
+            "  -H, --help        display this help and exit\n",
+            "  -V, --version     display version information and exit\n",
             "\n",
-            "\n",
+            "Examples:\n",
+            "  This sort via utf-8 code:\n",
+            "    cat file1.txt | aki-resort\n",
+            "  This sort via 1st chunk of numeric character according to numeric:\n",
+            "    cat file1.txt | aki-resort -e \"[0-9]+\" --according-to numeric\n",
             "\n",
         )
     };
@@ -429,10 +433,7 @@ mod test_s_3 {
         );
         assert_eq!(
             buff!(sioe, serr),
-            concat!(
-                program_name!(),
-                ": over max buffer size: 20\n"
-            )
+            concat!(program_name!(), ": over max buffer size: 20\n")
         );
         assert_eq!(buff!(sioe, sout), "");
         assert_eq!(r.is_ok(), false);

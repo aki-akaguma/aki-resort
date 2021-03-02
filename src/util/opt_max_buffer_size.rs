@@ -44,16 +44,16 @@ impl ::std::str::FromStr for OptMaxBufferSize {
             let unit: usize = if let Some(mat) = caps.get(2) {
                 match mat.as_str() {
                     "K" | "k" => 1024,
-                    "M" | "m" => 1024*1024,
-                    "G" | "g" => 1024*1024*1024,
-                    "T" | "t" => 1024*1024*1024*1024,
-                    "P" | "p" => 1024*1024*1024*1024*1024,
+                    "M" | "m" => 1024 * 1024,
+                    "G" | "g" => 1024 * 1024 * 1024,
+                    "T" | "t" => 1024 * 1024 * 1024 * 1024,
+                    "P" | "p" => 1024 * 1024 * 1024 * 1024 * 1024,
                     _ => 1,
                 }
             } else {
                 1
             };
-            Ok(OptMaxBufferSize::new(digit*unit))
+            Ok(OptMaxBufferSize::new(digit * unit))
         } else {
             let s = format!("can not parse '{}'", s);
             Err(OptMaxBufferSizeParseError::new(s))
@@ -95,8 +95,8 @@ impl ::std::error::Error for OptMaxBufferSizeParseError {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
     use super::*;
+    use std::str::FromStr;
 
     #[test]
     fn test_display_0() {
@@ -126,7 +126,7 @@ mod tests {
                 unreachable!();
             }
         };
-        assert_eq!(col, OptMaxBufferSize::new(123*1024));
+        assert_eq!(col, OptMaxBufferSize::new(123 * 1024));
     }
     #[test]
     fn test_from_str_123m() {
@@ -136,7 +136,7 @@ mod tests {
                 unreachable!();
             }
         };
-        assert_eq!(col, OptMaxBufferSize::new(123*1024*1024));
+        assert_eq!(col, OptMaxBufferSize::new(123 * 1024 * 1024));
     }
     #[test]
     fn test_from_str_123g() {
@@ -146,7 +146,7 @@ mod tests {
                 unreachable!();
             }
         };
-        assert_eq!(col, OptMaxBufferSize::new(123*1024*1024*1024));
+        assert_eq!(col, OptMaxBufferSize::new(123 * 1024 * 1024 * 1024));
     }
     #[test]
     fn test_from_str_123t() {
@@ -156,7 +156,7 @@ mod tests {
                 unreachable!();
             }
         };
-        assert_eq!(col, OptMaxBufferSize::new(123*1024*1024*1024*1024));
+        assert_eq!(col, OptMaxBufferSize::new(123 * 1024 * 1024 * 1024 * 1024));
     }
     #[test]
     fn test_from_str_123p() {
@@ -166,7 +166,10 @@ mod tests {
                 unreachable!();
             }
         };
-        assert_eq!(col, OptMaxBufferSize::new(123*1024*1024*1024*1024*1024));
+        assert_eq!(
+            col,
+            OptMaxBufferSize::new(123 * 1024 * 1024 * 1024 * 1024 * 1024)
+        );
     }
     #[test]
     fn test_from_str_invalid() {

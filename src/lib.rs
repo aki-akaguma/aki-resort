@@ -1,4 +1,4 @@
-//! sort lines of text.
+//! sort lines of text. You can use regex to specify the KEY.
 //!
 //! ```text
 //! Usage:
@@ -11,14 +11,20 @@
 //!       --according-to <word>     sort according to WORD: string, numeric, month, version
 //!
 //! Other options:
-//!   -e, --regex <exp>             regular expression. sort via this match point.
+//!   -e, --exp <exp>               regular expression. sort via this match point.
 //!   -k, --key <keydef>            sort via a key. keydef gives location.
 //!       --field-separator <sep>   use <sep> instead of non-blank to blank transition
 //!   -u, --unique                  output only the first line of an equal.
 //!       --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
 //!
-//!   -H, --help     display this help and exit
-//!   -V, --version  display version information and exit
+//!   -H, --help        display this help and exit
+//!   -V, --version     display version information and exit
+//!
+//! Examples:
+//!   This sort via utf-8 code:
+//!     cat file1.txt | aki-resort
+//!   This sort via 1st chunk of numeric character according to numeric:
+//!     cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
 //! ```
 //!
 //! # Examples
