@@ -1,7 +1,8 @@
 use crate::conf::CmdOptConf;
-use crate::sort_key::KeyColumns;
-use crate::sort_key::SortLinesBufferNumeric;
-use crate::sort_key::SortLinesBufferString;
+use crate::sort::KeyColumns;
+use crate::sort::{
+    SortLinesBufferMonth, SortLinesBufferNumeric, SortLinesBufferString, SortLinesBufferVersion,
+};
 use crate::util::err::BrokenPipeError;
 use crate::util::OptAccordingToWord;
 use regex::Regex;
@@ -29,7 +30,7 @@ fn lines_loop<T>(
     mut buf_lines: T,
 ) -> anyhow::Result<Vec<String>>
 where
-    T: crate::sort_key::SortLinesBuffer,
+    T: crate::sort::SortLinesBuffer,
 {
     let mut curr_sz: usize = 0;
     //
@@ -70,11 +71,23 @@ fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf, re: Option<Regex>) -> anyhow::Resu
     let v = match conf.opt_according_to {
         OptAccordingToWord::String => lines_loop(sioe, conf, re, SortLinesBufferString::new())?,
         OptAccordingToWord::Numeric => lines_loop(sioe, conf, re, SortLinesBufferNumeric::new())?,
-        _ => unimplemented!(),
+        OptAccordingToWord::Version => lines_loop(sioe, conf, re, SortLinesBufferVersion::new())?,
+        OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new())?,
     };
-    for line in v {
-        #[rustfmt::skip]
-        sioe.pout().lock().write_fmt(format_args!("{}\n", line))?;
+    if !conf.flg_unique {
+        for line in v {
+            #[rustfmt::skip]
+            sioe.pout().lock().write_fmt(format_args!("{}\n", line))?;
+        }
+    } else {
+        let mut pre_line = String::new();
+        for line in v {
+            if pre_line != line {
+                #[rustfmt::skip]
+                sioe.pout().lock().write_fmt(format_args!("{}\n", line))?;
+                pre_line = line;
+            }
+        }
     }
     //
     sioe.pout().lock().flush()?;

@@ -24,8 +24,6 @@ Ordering options:
 
 Other options:
   -e, --exp <exp>               regular expression. sort via this match point.
-  -k, --key <keydef>            sort via a key. keydef gives location.
-      --field-separator <sep>   use <sep> instead of non-blank to blank transition
   -u, --unique                  output only the first line of an equal.
       --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
 
@@ -62,15 +60,15 @@ and install **.deb** into your local repository of debian package.
 The input data used in this example looks like this:
 
 ```
-cat file1.txt
+cat fixtures/fruit.txt
 ```
 
 result output:
 ```
-ABCDEFG:33:abc
-OPQRSTU:222:opq
-VWXYZ:4:vwx
-HIJKLMN:1111:hij
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Cherry:4:4:good:Oct
+Kiwi:1111:1.1.11:good:Jun
 ```
 
 ### Example 1: simple sort
@@ -79,15 +77,15 @@ This sort via utf-8 code.
 
 command line:
 ```
-cat file1.txt | aki-resort
+cat fixtures/fruit.txt | aki-resort
 ```
 
 result output:
 ```
-ABCDEFG:33:abc
-HIJKLMN:1111:hij
-OPQRSTU:222:opq
-VWXYZ:4:vwx
+Apple:33:3.3:good:Mar
+Cherry:4:4:good:Oct
+Kiwi:1111:1.1.11:good:Jun
+Orange:222:1.1.2:good:Jan
 ```
 
 ### Example 2: numeric sort
@@ -96,15 +94,49 @@ This sort via 1st chunk of numeric character according to numeric.
 
 command line:
 ```
-cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
+cat fixtures/fruit.txt | aki-resort -e "[0-9]+" --according-to numeric
 ```
 
 result output:
 ```
-VWXYZ:4:vwx
-ABCDEFG:33:abc
-OPQRSTU:222:opq
-HIJKLMN:1111:hij
+Cherry:4:4:good:Oct
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Kiwi:1111:1.1.11:good:Jun
+```
+
+### Example 3: version sort
+
+This sort via 1st capture of version character according to version.
+
+command line:
+```
+cat fixtures/fruit.txt | aki-resort -e "^[^:]+:[^:]+:([^:]+)" --according-to version
+```
+
+result output:
+```
+Orange:222:1.1.2:good:Jan
+Kiwi:1111:1.1.11:good:Jun
+Apple:33:3.3:good:Mar
+Cherry:4:4:good:Oct
+```
+
+### Example 4: month sort
+
+This sort via 1st capture of month character according to month.
+
+command line:
+```
+cat fixtures/fruit.txt | aki-resort -e ":([^:]+)$" --according-to month
+```
+
+result output:
+```
+Orange:222:1.1.2:good:Jan
+Apple:33:3.3:good:Mar
+Kiwi:1111:1.1.11:good:Jun
+Cherry:4:4:good:Oct
 ```
 
 ## Library example

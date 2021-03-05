@@ -7,4 +7,3 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0"
 flood-tide-gen = "0.1"
-#flood-tide-gen = { path = "../../../lib/flood-tide-gen" }
