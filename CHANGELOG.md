@@ -2,6 +2,17 @@ TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.2 (2021-03-05)
+=====
+
+* implement option: -u, --unique
+* rename directory sort_key to sort
+* implement option: --according-to vrsion
+* implement option: --according-to month
+* remove option: -k, --key <keydef>
+* remove option: --field-separator <sep>
+* add many doc
+
 0.1.1 (2021-03-03)
 =====
 

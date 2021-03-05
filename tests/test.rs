@@ -16,8 +16,6 @@ macro_rules! help_msg {
             "\n",
             "Other options:\n",
             "  -e, --exp <exp>               regular expression. sort via this match point.\n",
-            "  -k, --key <keydef>            sort via a key. keydef gives location.\n",
-            "      --field-separator <sep>   use <sep> instead of non-blank to blank transition\n",
             "  -u, --unique                  output only the first line of an equal.\n",
             "      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.\n",
             "\n",
@@ -117,6 +115,13 @@ mod test_0 {
     */
 } // mod test_0
 
+const IN_DAT_FRUIT: &str = "\
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Cherry:4:4:good:Oct
+Kiwi:1111:1.1.11:good:Jun
+";
+
 mod test_string {
     use crate::helper::exec_target_with_in;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
@@ -126,22 +131,16 @@ mod test_string {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &[] as &[&str],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "ABCDEFG:33:abc\n",
-                "HIJKLMN:1111:hij\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -149,25 +148,15 @@ mod test_string {
     //
     #[test]
     fn test_t2() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            &["-r"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
-        );
+        let oup = exec_target_with_in(TARGET_EXE_PATH, &["-r"], super::IN_DAT_FRUIT.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "VWXYZ:4:vwx\n",
-                "OPQRSTU:222:opq\n",
-                "HIJKLMN:1111:hij\n",
-                "ABCDEFG:33:abc\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -178,22 +167,16 @@ mod test_string {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["-e", "[0-9]+"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "HIJKLMN:1111:hij\n",
-                "OPQRSTU:222:opq\n",
-                "ABCDEFG:33:abc\n",
-                "VWXYZ:4:vwx\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -204,22 +187,16 @@ mod test_string {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["-e", "[0-9]+", "-r"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "VWXYZ:4:vwx\n",
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "HIJKLMN:1111:hij\n",
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -227,38 +204,25 @@ mod test_string {
     //
     #[test]
     fn test_t5() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            &["-e", "[0-9]+"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
-        );
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_in(TARGET_EXE_PATH, &["-e", "[0-9]+"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "HIJKLMN:1111:hij\n",
-                "HIJKLMN:1111:hij\n",
-                "OPQRSTU:222:opq\n",
-                "OPQRSTU:222:opq\n",
-                "ABCDEFG:33:abc\n",
-                "ABCDEFG:33:abc\n",
-                "VWXYZ:4:vwx\n",
-                "VWXYZ:4:vwx\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "Cherry:4:4:good:Oct\n",
             )
         );
         assert_eq!(oup.status.success(), true);
     }
-} // mod test_1
+}
 
 mod test_numeric {
     use crate::helper::exec_target_with_in;
@@ -269,19 +233,13 @@ mod test_numeric {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["--according-to", "numeric"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:1:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,14):\'ABCDEFG:33:abc\': invalid digit found in string\n",
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -293,19 +251,13 @@ mod test_numeric {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["--according-to", "numeric", "-r"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:1:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,14):\'ABCDEFG:33:abc\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -317,22 +269,16 @@ mod test_numeric {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["-e", "[0-9]+", "--according-to", "numeric"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "VWXYZ:4:vwx\n",
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "HIJKLMN:1111:hij\n",
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -343,22 +289,16 @@ mod test_numeric {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["-e", "[0-9]+", "--according-to", "numeric", "-r"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "HIJKLMN:1111:hij\n",
-                "OPQRSTU:222:opq\n",
-                "ABCDEFG:33:abc\n",
-                "VWXYZ:4:vwx\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -366,40 +306,31 @@ mod test_numeric {
     //
     #[test]
     fn test_t5() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             &["-e", "[0-9]+", "--according-to", "numeric"],
-            concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:4:vwx\n",
-                "HIJKLMN:1111:hij\n",
-            )
-            .as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
             concat!(
-                "VWXYZ:4:vwx\n",
-                "VWXYZ:4:vwx\n",
-                "ABCDEFG:33:abc\n",
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "OPQRSTU:222:opq\n",
-                "HIJKLMN:1111:hij\n",
-                "HIJKLMN:1111:hij\n",
+                "Cherry:4:4:good:Oct\n",
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
         assert_eq!(oup.status.success(), true);
     }
-} // mod test_2
+}
 
-mod test_3 {
+mod test_version {
     use crate::helper::exec_target_with_in;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
@@ -407,14 +338,226 @@ mod test_3 {
     fn test_t1() {
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
-            &["--max-buffer", "20"],
+            &["--according-to", "version"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
             concat!(
-                "ABCDEFG:33:abc\n",
-                "OPQRSTU:222:opq\n",
-                "VWXYZ:1:vwx\n",
-                "HIJKLMN:1111:hij\n",
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
             )
-            .as_bytes(),
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "version", "-r"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-r",
+            ],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
+mod test_month {
+    use crate::helper::exec_target_with_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_t1() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "month"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "month", "-r"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["-e", ":([^:]+)$", "--according-to", "month"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["-e", ":([^:]+)$", "--according-to", "month", "-r"],
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:4:4:good:Oct\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["-e", ":([^:]+)$", "--according-to", "month"],
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Cherry:4:4:good:Oct\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
+mod test_2 {
+    use crate::helper::exec_target_with_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_max_buffer() {
+        let oup = exec_target_with_in(
+            TARGET_EXE_PATH,
+            &["--max-buffer", "20"],
+            super::IN_DAT_FRUIT.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -422,6 +565,23 @@ mod test_3 {
         );
         assert_eq!(oup.stdout, "");
         assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_uniq() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_in(TARGET_EXE_PATH, &["-u"], in_w.as_bytes());
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
     }
 }
 /*

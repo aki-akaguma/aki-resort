@@ -1,8 +1,12 @@
+pub mod month;
 pub mod numeric;
 pub mod string;
+pub mod version;
 
+pub use month::SortLinesBufferMonth;
 pub use numeric::SortLinesBufferNumeric;
 pub use string::SortLinesBufferString;
+pub use version::SortLinesBufferVersion;
 
 #[derive(Debug)]
 pub struct KeyColumns(usize, usize);
