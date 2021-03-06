@@ -5,7 +5,7 @@ use flood_tide_gen::{gen_src_help, SrcHelpFlags};
 use flood_tide_gen::{MetaType, OptStr};
 
 pub fn do_gen_src() -> anyhow::Result<()> {
-    let (mut vec_optstr, vec_line) = parse_input_file("xtask/src/cmd.txt")?;
+    let (mut vec_optstr, vec_line) = parse_input_file("xtask/src/aki-resort-cmd.txt")?;
     //
     fix_type(&mut vec_optstr);
     //

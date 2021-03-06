@@ -36,7 +36,8 @@ where
     //
     // read all lines
     for line in sioe.pin().lock().lines() {
-        let line_s = line?;
+        let mut line_s = line?;
+        line_s.shrink_to_fit();
         let line_ss = line_s.as_str();
         let line_len: usize = line_ss.len();
         //
