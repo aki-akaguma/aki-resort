@@ -1,27 +1,33 @@
 use super::{KeyColumns, SortLinesBuffer};
 use std::cmp::Ordering;
-use std::collections::BinaryHeap;
 
 pub struct SortLinesBufferMonth {
-    buf_lines: BinaryHeap<SortLine>,
+    buf_lines: Vec<SortLine>,
+    reverse: bool,
 }
 impl SortLinesBufferMonth {
-    pub fn new() -> Self {
+    pub fn new(a_reverse: bool) -> Self {
         Self {
-            buf_lines: BinaryHeap::new(),
+            buf_lines: Vec::new(),
+            reverse: a_reverse,
         }
     }
 }
 impl SortLinesBuffer for SortLinesBufferMonth {
-    fn push_line(&mut self, reverse: bool, key: KeyColumns, line: String) -> anyhow::Result<()> {
-        let sort_line = SortLine::new(reverse, key, line)?;
+    fn push_line(&mut self, key: KeyColumns, line: String) -> anyhow::Result<()> {
+        let sort_line = SortLine::new(self.buf_lines.len(), key, line)?;
         self.buf_lines.push(sort_line);
         Ok(())
     }
-    fn into_sorted_vec(self) -> Vec<String> {
-        let sorted_vec: Vec<SortLine> = self.buf_lines.into_sorted_vec();
-        let mut ret_vec = Vec::with_capacity(sorted_vec.len());
-        for sort_line in sorted_vec.into_iter() {
+    fn into_sorted_vec(mut self) -> Vec<String> {
+        use rayon::slice::ParallelSliceMut;
+        if !self.reverse {
+            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(&b));
+        } else {
+            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(&a));
+        }
+        let mut ret_vec = Vec::with_capacity(self.buf_lines.len());
+        for sort_line in self.buf_lines.into_iter() {
             ret_vec.push(sort_line.line);
         }
         ret_vec
@@ -29,7 +35,7 @@ impl SortLinesBuffer for SortLinesBufferMonth {
 }
 
 struct SortLine {
-    reverse: bool,
+    num: usize,
     key: i64,
     line: String,
 }
@@ -50,7 +56,7 @@ const DICT_FULL: [(&str, &str, &str); 12] = [
 ];
 
 impl SortLine {
-    fn new(a_reverse: bool, a_key: KeyColumns, a_line: String) -> anyhow::Result<Self> {
+    fn new(a_num: usize, a_key: KeyColumns, a_line: String) -> anyhow::Result<Self> {
         let key = a_line[a_key.0..a_key.1].to_ascii_lowercase();
         let idx = match DICT_FULL
             .iter()
@@ -68,7 +74,7 @@ impl SortLine {
             }
         };
         Ok(Self {
-            reverse: a_reverse,
+            num: a_num,
             key: idx as i64,
             line: a_line,
         })
@@ -78,21 +84,22 @@ impl SortLine {
 impl PartialOrd for SortLine {
     #[inline]
     fn partial_cmp(&self, other: &SortLine) -> Option<Ordering> {
-        if !self.reverse {
-            Some(self.key.cmp(&other.key))
-        } else {
-            Some(other.key.cmp(&self.key))
-        }
+        let r = self.key.cmp(&other.key);
+        let r = match r {
+            Ordering::Equal => self.num.cmp(&other.num),
+            _ => r,
+        };
+        Some(r)
     }
 }
 
 impl Ord for SortLine {
     #[inline]
     fn cmp(&self, other: &SortLine) -> Ordering {
-        if !self.reverse {
-            self.key.cmp(&other.key)
-        } else {
-            other.key.cmp(&self.key)
+        let r = self.key.cmp(&other.key);
+        match r {
+            Ordering::Equal => self.num.cmp(&other.num),
+            _ => r,
         }
     }
 }
@@ -111,7 +118,7 @@ mod debug {
     use super::*;
     #[test]
     fn size_of() {
-        assert_eq!(std::mem::size_of::<SortLinesBufferMonth>(), 24);
+        assert_eq!(std::mem::size_of::<SortLinesBufferMonth>(), 32);
         assert_eq!(std::mem::size_of::<SortLine>(), 40);
     }
 }

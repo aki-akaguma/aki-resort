@@ -17,7 +17,7 @@ impl KeyColumns {
 }
 
 pub trait SortLinesBuffer {
-    fn push_line(&mut self, reverse: bool, key: KeyColumns, line: String) -> anyhow::Result<()>;
+    fn push_line(&mut self, key: KeyColumns, line: String) -> anyhow::Result<()>;
     fn into_sorted_vec(self) -> Vec<String>;
 }
 

@@ -62,18 +62,25 @@ where
             KeyColumns::new(0, line_len)
         };
         //
-        buf_lines.push_line(conf.flg_reverse, key, line_s)?;
+        buf_lines.push_line(key, line_s)?;
     }
     // all lines
     Ok(buf_lines.into_sorted_vec())
 }
 
 fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf, re: Option<Regex>) -> anyhow::Result<()> {
+    let flg_r = conf.flg_reverse;
     let v = match conf.opt_according_to {
-        OptAccordingToWord::String => lines_loop(sioe, conf, re, SortLinesBufferString::new())?,
-        OptAccordingToWord::Numeric => lines_loop(sioe, conf, re, SortLinesBufferNumeric::new())?,
-        OptAccordingToWord::Version => lines_loop(sioe, conf, re, SortLinesBufferVersion::new())?,
-        OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new())?,
+        OptAccordingToWord::String => {
+            lines_loop(sioe, conf, re, SortLinesBufferString::new(flg_r))?
+        }
+        OptAccordingToWord::Numeric => {
+            lines_loop(sioe, conf, re, SortLinesBufferNumeric::new(flg_r))?
+        }
+        OptAccordingToWord::Version => {
+            lines_loop(sioe, conf, re, SortLinesBufferVersion::new(flg_r))?
+        }
+        OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new(flg_r))?,
     };
     if !conf.flg_unique {
         for line in v {
