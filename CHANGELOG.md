@@ -2,10 +2,16 @@ TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.5 (2021-03-08)
+=====
+
+* update crate: runnel
+
 0.1.4 (2021-03-07)
 =====
 
 * use rayon::slice::ParallelSliceMut, for parallel sort
+* rename file: xtask/src/cmd.txt to xtask/src/aki-resort-cmd.txt
 
 0.1.3 (2021-03-06)
 =====
