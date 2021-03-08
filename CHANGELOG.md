@@ -1,6 +1,12 @@
-TBD
+aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
+
+0.1.6 (2021-03-08)
+=====
+
+* update crate: runnel
+* update crate: rustc_version ("0.3")
 
 0.1.5 (2021-03-08)
 =====
