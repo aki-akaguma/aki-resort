@@ -26,6 +26,7 @@ fn fix_type(vec_optstr: &mut [OptStr]) {
             "continue-at" => MetaType::U64,
             */
             "according-to" => MetaType::Other("opt_according_to_word".to_string()),
+            "color" => MetaType::Other("opt_color_when".to_string()),
             "max-buffer" => MetaType::Other("opt_max_buffer_size".to_string()),
             _ => v.meta_type.clone(),
         };

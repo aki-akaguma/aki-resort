@@ -9,16 +9,33 @@ pub use string::SortLinesBufferString;
 pub use version::SortLinesBufferVersion;
 
 #[derive(Debug)]
-pub struct KeyColumns(usize, usize);
+pub(crate) struct KeyColumns {
+    pub st: usize,
+    pub ed: usize,
+}
 impl KeyColumns {
     pub fn new(a_st: usize, a_ed: usize) -> Self {
-        Self(a_st, a_ed)
+        Self { st: a_st, ed: a_ed }
     }
 }
 
-pub trait SortLinesBuffer {
+#[derive(Debug)]
+pub(crate) struct KeyLine {
+    pub key: KeyColumns,
+    pub line: String,
+}
+impl KeyLine {
+    pub fn new(a_key: KeyColumns, a_line: String) -> Self {
+        Self {
+            key: a_key,
+            line: a_line,
+        }
+    }
+}
+
+pub(crate) trait SortLinesBuffer {
     fn push_line(&mut self, key: KeyColumns, line: String) -> anyhow::Result<()>;
-    fn into_sorted_vec(self) -> Vec<String>;
+    fn into_sorted_vec(self) -> Vec<KeyLine>;
 }
 
 #[cfg(test)]

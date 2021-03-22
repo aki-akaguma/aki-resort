@@ -8,15 +8,27 @@
 //!
 //! Ordering options:
 //!   -r, --reverse                 reverse the result of comparisons
-//!       --according-to <word>     sort according to WORD: string, numeric, month, version
+//!       --according-to <word>     sort according to <word>
 //!
 //! Other options:
-//!   -e, --exp <exp>               regular expression. sort via this match point.
-//!   -u, --unique                  output only the first line of an equal.
-//!       --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
+//!       --color <when>            use markers to highlight the matching strings
+//!   -e, --exp <exp>               regular expression. sort by the entires match
+//!   -u, --unique                  output only the first line of an equal
+//!       --max-buffer <size>       max buffer size
 //!
 //!   -H, --help        display this help and exit
 //!   -V, --version     display version information and exit
+//!
+//! Option Parameters:
+//!   <word>    'string', 'numeric', 'month', 'version'
+//!   <when>    'always', 'never', or 'auto'
+//!   <exp>     regular expression, sort by the entires match.
+//!   <size>    if a reading size is more than <size>, then it is not output,
+//!             quit and display error message.
+//!
+//! Environments:
+//!   AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi
+//!   AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi
 //!
 //! Examples:
 //!   This sort via utf-8 code:
@@ -120,7 +132,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate anyhow;
 
-mod conf;
+pub mod conf;
 mod run;
 mod sort;
 mod util;
@@ -167,6 +179,16 @@ const TRY_HELP_MSG: &str = "Try --help for help.";
 /// ```
 ///
 pub fn execute(sioe: &RunnelIoe, prog_name: &str, args: &[&str]) -> anyhow::Result<()> {
+    let env = conf::EnvConf::new();
+    execute_env(sioe, prog_name, args, &env)
+}
+
+pub fn execute_env(
+    sioe: &RunnelIoe,
+    prog_name: &str,
+    args: &[&str],
+    env: &conf::EnvConf,
+) -> anyhow::Result<()> {
     let conf = match conf::parse_cmdopts(prog_name, args) {
         Ok(conf) => conf,
         Err(errs) => {
@@ -179,5 +201,5 @@ pub fn execute(sioe: &RunnelIoe, prog_name: &str, args: &[&str]) -> anyhow::Resu
             return Err(anyhow!("{}\n{}", errs, TRY_HELP_MSG));
         }
     };
-    run::run(sioe, &conf)
+    run::run(sioe, &conf, &env)
 }
