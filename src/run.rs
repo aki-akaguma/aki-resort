@@ -1,22 +1,23 @@
-use crate::conf::CmdOptConf;
-use crate::sort::KeyColumns;
+use crate::conf::{CmdOptConf, EnvConf};
+use crate::sort::{KeyColumns, KeyLine};
 use crate::sort::{
     SortLinesBufferMonth, SortLinesBufferNumeric, SortLinesBufferString, SortLinesBufferVersion,
 };
 use crate::util::err::BrokenPipeError;
 use crate::util::OptAccordingToWord;
+use crate::util::OptColorWhen;
 use regex::Regex;
 use runnel::RunnelIoe;
 use std::io::{BufRead, Write};
 
-pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf) -> anyhow::Result<()> {
+pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf, env: &EnvConf) -> anyhow::Result<()> {
     let re = if !conf.opt_exp.is_empty() {
         let re = Regex::new(conf.opt_exp.as_str())?;
         Some(re)
     } else {
         None
     };
-    let r = run_0(sioe, conf, re);
+    let r = run_0(sioe, conf, env, re);
     if r.is_broken_pipe() {
         return Ok(());
     }
@@ -28,7 +29,7 @@ fn lines_loop<T>(
     conf: &CmdOptConf,
     re: Option<Regex>,
     mut buf_lines: T,
-) -> anyhow::Result<Vec<String>>
+) -> anyhow::Result<Vec<KeyLine>>
 where
     T: crate::sort::SortLinesBuffer,
 {
@@ -68,7 +69,19 @@ where
     Ok(buf_lines.into_sorted_vec())
 }
 
-fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf, re: Option<Regex>) -> anyhow::Result<()> {
+fn run_0(
+    sioe: &RunnelIoe,
+    conf: &CmdOptConf,
+    env: &EnvConf,
+    re: Option<Regex>,
+) -> anyhow::Result<()> {
+    let color_start_s = env.color_seq_start.as_str();
+    let color_end_s = env.color_seq_end.as_str();
+    let color_is_alyways = if let OptColorWhen::Always = conf.opt_color {
+        true
+    } else {
+        false
+    };
     let flg_r = conf.flg_reverse;
     let v = match conf.opt_according_to {
         OptAccordingToWord::String => {
@@ -82,18 +95,50 @@ fn run_0(sioe: &RunnelIoe, conf: &CmdOptConf, re: Option<Regex>) -> anyhow::Resu
         }
         OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new(flg_r))?,
     };
-    if !conf.flg_unique {
-        for line in v {
-            #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{}\n", line))?;
+    //
+    #[allow(clippy::collapsible_if)]
+    if !color_is_alyways {
+        if !conf.flg_unique {
+            for key_line in v {
+                #[rustfmt::skip]
+                sioe.pout().lock().write_fmt(format_args!("{}\n", key_line.line))?;
+            }
+        } else {
+            let mut pre_line = String::new();
+            for key_line in v {
+                if pre_line != key_line.line {
+                    #[rustfmt::skip]
+                    sioe.pout().lock().write_fmt(format_args!("{}\n", key_line.line))?;
+                    pre_line = key_line.line;
+                }
+            }
         }
     } else {
-        let mut pre_line = String::new();
-        for line in v {
-            if pre_line != line {
+        if !conf.flg_unique {
+            for key_line in v {
+                let mut out_s: String = String::new();
+                out_s.push_str(&key_line.line[0..key_line.key.st]);
+                out_s.push_str(color_start_s);
+                out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+                out_s.push_str(color_end_s);
+                out_s.push_str(&key_line.line[key_line.key.ed..]);
                 #[rustfmt::skip]
-                sioe.pout().lock().write_fmt(format_args!("{}\n", line))?;
-                pre_line = line;
+                sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
+            }
+        } else {
+            let mut pre_line = String::new();
+            for key_line in v {
+                if pre_line != key_line.line {
+                    let mut out_s: String = String::new();
+                    out_s.push_str(&key_line.line[0..key_line.key.st]);
+                    out_s.push_str(color_start_s);
+                    out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+                    out_s.push_str(color_end_s);
+                    out_s.push_str(&key_line.line[key_line.key.ed..]);
+                    #[rustfmt::skip]
+                    sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
+                    pre_line = key_line.line;
+                }
             }
         }
     }

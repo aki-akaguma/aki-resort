@@ -10,15 +10,27 @@ macro_rules! help_msg {
             "\n",
             "Ordering options:\n",
             "  -r, --reverse                 reverse the result of comparisons\n",
-            "      --according-to <word>     sort according to WORD: string, numeric, month, version\n",
+            "      --according-to <word>     sort according to <word>\n",
             "\n",
             "Other options:\n",
-            "  -e, --exp <exp>               regular expression. sort via this match point.\n",
-            "  -u, --unique                  output only the first line of an equal.\n",
-            "      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.\n",
+            "      --color <when>            use markers to highlight the matching strings\n",
+            "  -e, --exp <exp>               regular expression. sort by the entires match\n",
+            "  -u, --unique                  output only the first line of an equal\n",
+            "      --max-buffer <size>       max buffer size\n",
             "\n",
             "  -H, --help        display this help and exit\n",
             "  -V, --version     display version information and exit\n",
+            "\n",
+            "Option Parameters:\n",
+            "  <word>    'string', 'numeric', 'month', 'version'\n",
+            "  <when>    'always', 'never', or 'auto'\n",
+            "  <exp>     regular expression, sort by the entires match.\n",
+            "  <size>    if a reading size is more than <size>, then it is not output,\n",
+            "            quit and display error message.\n",
+            "\n",
+            "Environments:\n",
+            "  AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi\n",
+            "  AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi\n",
             "\n",
             "Examples:\n",
             "  This sort via utf-8 code:\n",
@@ -84,6 +96,28 @@ macro_rules! do_execute {
         };
         (r, sioe)
     }};
+    ($env:expr, $args:expr, $sin:expr,) => {{
+        do_execute!($env, $args, $sin)
+    }};
+    ($env:expr, $args:expr, $sin:expr) => {{
+        let sioe = RunnelIoe::new(
+            Box::new(StringIn::with_str($sin)),
+            Box::new(StringOut::default()),
+            Box::new(StringErr::default()),
+        );
+        let program = env!("CARGO_PKG_NAME");
+        let r = execute_env(&sioe, &program, $args, $env);
+        match r {
+            Ok(_) => {}
+            Err(ref err) => {
+                let _ = sioe
+                    .perr()
+                    .lock()
+                    .write_fmt(format_args!("{}: {:#}\n", program, err));
+            }
+        };
+        (r, sioe)
+    }};
 }
 
 macro_rules! buff {
@@ -94,6 +128,35 @@ macro_rules! buff {
         $sioe.pout().lock().buffer_str()
     };
 }
+
+//
+macro_rules! color_start {
+    //() => { "\u{1B}[01;31m" }
+    () => {
+        "<S>"
+    };
+}
+macro_rules! color_end {
+    //() => {"\u{1B}[0m"}
+    () => {
+        "<E>"
+    };
+}
+macro_rules! env_1 {
+    () => {{
+        let mut env = conf::EnvConf::new();
+        env.color_seq_start = color_start!().to_string();
+        env.color_seq_end = color_end!().to_string();
+        env
+    }};
+}
+
+const IN_DAT_FRUIT: &str = "\
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Cherry:4:4:good:Oct
+Kiwi:1111:1.1.11:good:Jun
+";
 
 mod test_s0 {
     use libaki_resort::*;
@@ -148,13 +211,6 @@ mod test_s0 {
     }
     */
 }
-
-const IN_DAT_FRUIT: &str = "\
-Apple:33:3.3:good:Mar
-Orange:222:1.1.2:good:Jan
-Cherry:4:4:good:Oct
-Kiwi:1111:1.1.11:good:Jun
-";
 
 mod test_s_string {
     use libaki_resort::*;
@@ -242,6 +298,111 @@ mod test_s_string {
                 "Apple:33:3.3:good:Mar\n",
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+}
+
+mod test_s_string_color {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(&env, &["--color", "always"], super::IN_DAT_FRUIT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(&env, &["-r", "--color", "always"], super::IN_DAT_FRUIT);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["-e", "[0-9]+", "--color", "always"],
+            super::IN_DAT_FRUIT
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["-e", "[0-9]+", "-r", "--color", "always"],
+            super::IN_DAT_FRUIT
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(&env, &["-e", "[0-9]+", "--color", "always"], in_w.as_str());
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
         assert_eq!(r.is_ok(), true);
@@ -339,6 +500,141 @@ mod test_s_numeric {
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+}
+
+mod test_s_numeric_color {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "numeric", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "numeric", "-r", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "-r",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
         assert_eq!(r.is_ok(), true);
@@ -448,6 +744,141 @@ mod test_s_version {
     }
 }
 
+mod test_s_version_color {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "version", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "version", "-r", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-r",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:4:<S>4<E>:good:Oct\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+}
+
 mod test_s_month {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
@@ -545,6 +976,141 @@ mod test_s_month {
     }
 }
 
+mod test_s_month_color {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "month", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &["--according-to", "month", "-r", "--color", "always"],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert_eq!(r.is_ok(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "-r",
+                "--color",
+                "always"
+            ],
+            super::IN_DAT_FRUIT,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:4:4:good:<S>Oct<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+}
+
 mod test_s_2 {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
@@ -574,6 +1140,24 @@ mod test_s_2 {
                 "Cherry:4:4:good:Oct\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_uniq_color() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(&env, &["-u", "--color", "always"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
         assert_eq!(r.is_ok(), true);

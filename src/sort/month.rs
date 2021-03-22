@@ -1,4 +1,4 @@
-use super::{KeyColumns, SortLinesBuffer};
+use super::{KeyColumns, KeyLine, SortLinesBuffer};
 use std::cmp::Ordering;
 
 pub struct SortLinesBufferMonth {
@@ -19,7 +19,7 @@ impl SortLinesBuffer for SortLinesBufferMonth {
         self.buf_lines.push(sort_line);
         Ok(())
     }
-    fn into_sorted_vec(mut self) -> Vec<String> {
+    fn into_sorted_vec(mut self) -> Vec<KeyLine> {
         use rayon::slice::ParallelSliceMut;
         if !self.reverse {
             self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(&b));
@@ -28,16 +28,17 @@ impl SortLinesBuffer for SortLinesBufferMonth {
         }
         let mut ret_vec = Vec::with_capacity(self.buf_lines.len());
         for sort_line in self.buf_lines.into_iter() {
-            ret_vec.push(sort_line.line);
+            ret_vec.push(sort_line.key_line);
         }
         ret_vec
     }
 }
 
+#[derive(Debug)]
 struct SortLine {
     num: usize,
     key: i64,
-    line: String,
+    key_line: KeyLine,
 }
 
 const DICT_FULL: [(&str, &str, &str); 12] = [
@@ -57,7 +58,7 @@ const DICT_FULL: [(&str, &str, &str); 12] = [
 
 impl SortLine {
     fn new(a_num: usize, a_key: KeyColumns, a_line: String) -> anyhow::Result<Self> {
-        let key = a_line[a_key.0..a_key.1].to_ascii_lowercase();
+        let key = a_line[a_key.st..a_key.ed].to_ascii_lowercase();
         let idx = match DICT_FULL
             .iter()
             .position(|item| item.0 == key || item.1 == key || item.2 == key)
@@ -66,8 +67,8 @@ impl SortLine {
             None => {
                 return Err(anyhow!(
                     "({},{}):'{}': {}",
-                    a_key.0,
-                    a_key.1,
+                    a_key.st,
+                    a_key.ed,
                     a_line,
                     "invalid month strings"
                 ));
@@ -76,7 +77,7 @@ impl SortLine {
         Ok(Self {
             num: a_num,
             key: idx as i64,
-            line: a_line,
+            key_line: KeyLine::new(a_key, a_line),
         })
     }
 }
@@ -119,6 +120,6 @@ mod debug {
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferMonth>(), 32);
-        assert_eq!(std::mem::size_of::<SortLine>(), 40);
+        assert_eq!(std::mem::size_of::<SortLine>(), 56);
     }
 }

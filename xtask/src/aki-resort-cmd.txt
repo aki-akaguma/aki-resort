@@ -1,11 +1,12 @@
 Ordering options:
   -r, --reverse                 reverse the result of comparisons
-      --according-to <word>     sort according to WORD: string, numeric, month, version
+      --according-to <word>     sort according to <word>
 
 Other options:
-  -e, --exp <exp>               regular expression. sort via this match point.
-  -u, --unique                  output only the first line of an equal.
-      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
+      --color <when>            use markers to highlight the matching strings
+  -e, --exp <exp>               regular expression. sort by the entires match
+  -u, --unique                  output only the first line of an equal
+      --max-buffer <size>       max buffer size
 
   -H, --help        display this help and exit
   -V, --version     display version information and exit

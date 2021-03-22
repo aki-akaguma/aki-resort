@@ -93,3 +93,36 @@ where
         stderr: String::from(String::from_utf8_lossy(&output.stderr)),
     }
 }
+
+pub fn exec_target_with_env_in<I, S, IKV, K, V>(
+    target_exe: &str,
+    args: I,
+    env: IKV,
+    in_bytes: &[u8],
+) -> OutputString
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+    IKV: IntoIterator<Item = (K, V)>,
+    K: AsRef<OsStr>,
+    V: AsRef<OsStr>,
+{
+    let mut cmd: Command = Command::new(target_exe);
+    setup_envs(&mut cmd, env)
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    let mut child = cmd.spawn().expect("failed to execute child");
+    {
+        let stdin = child.stdin.as_mut().expect("failed to get stdin");
+        stdin.write_all(in_bytes).expect("failed to write to stdin");
+    }
+    let output: Output = child.wait_with_output().expect("failed to wait on child");
+    //
+    OutputString {
+        status: output.status,
+        stdout: String::from(String::from_utf8_lossy(&output.stdout)),
+        stderr: String::from(String::from_utf8_lossy(&output.stderr)),
+    }
+}

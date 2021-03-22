@@ -12,15 +12,27 @@ macro_rules! help_msg {
             "\n",
             "Ordering options:\n",
             "  -r, --reverse                 reverse the result of comparisons\n",
-            "      --according-to <word>     sort according to WORD: string, numeric, month, version\n",
+            "      --according-to <word>     sort according to <word>\n",
             "\n",
             "Other options:\n",
-            "  -e, --exp <exp>               regular expression. sort via this match point.\n",
-            "  -u, --unique                  output only the first line of an equal.\n",
-            "      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.\n",
+            "      --color <when>            use markers to highlight the matching strings\n",
+            "  -e, --exp <exp>               regular expression. sort by the entires match\n",
+            "  -u, --unique                  output only the first line of an equal\n",
+            "      --max-buffer <size>       max buffer size\n",
             "\n",
             "  -H, --help        display this help and exit\n",
             "  -V, --version     display version information and exit\n",
+            "\n",
+            "Option Parameters:\n",
+            "  <word>    'string', 'numeric', 'month', 'version'\n",
+            "  <when>    'always', 'never', or 'auto'\n",
+            "  <exp>     regular expression, sort by the entires match.\n",
+            "  <size>    if a reading size is more than <size>, then it is not output,\n",
+            "            quit and display error message.\n",
+            "\n",
+            "Environments:\n",
+            "  AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi\n",
+            "  AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi\n",
             "\n",
             "Examples:\n",
             "  This sort via utf-8 code:\n",
@@ -60,11 +72,45 @@ macro_rules! fixture_text10k {
 }
 */
 
+//
+macro_rules! color_start {
+    //() => { "\u{1B}[01;31m" }
+    () => {
+        "<S>"
+    };
+}
+macro_rules! color_end {
+    //() => {"\u{1B}[0m"}
+    () => {
+        "<E>"
+    };
+}
+macro_rules! env_1 {
+    () => {{
+        let mut env = std::collections::HashMap::new();
+        env.insert(
+            "AKI_RESORT_COLOR_SEQ_ST".to_string(),
+            color_start!().to_string(),
+        );
+        env.insert(
+            "AKI_RESORT_COLOR_SEQ_ED".to_string(),
+            color_end!().to_string(),
+        );
+        env
+    }};
+}
+
+const IN_DAT_FRUIT: &str = "\
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Cherry:4:4:good:Oct
+Kiwi:1111:1.1.11:good:Jun
+";
+
 mod helper;
 
 mod test_0 {
     use crate::helper::exec_target;
-    //use exec_target::args_from;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
     #[test]
@@ -113,14 +159,7 @@ mod test_0 {
         assert_eq!(oup.status.success(), false);
     }
     */
-} // mod test_0
-
-const IN_DAT_FRUIT: &str = "\
-Apple:33:3.3:good:Mar
-Orange:222:1.1.2:good:Jan
-Cherry:4:4:good:Oct
-Kiwi:1111:1.1.11:good:Jun
-";
+}
 
 mod test_string {
     use crate::helper::exec_target_with_in;
@@ -218,6 +257,126 @@ mod test_string {
                 "Apple:33:3.3:good:Mar\n",
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
+mod test_string_color {
+    use crate::helper::exec_target_with_env_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["-r", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["-e", "[0-9]+", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["-e", "[0-9]+", "-r", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["-e", "[0-9]+", "--color", "always"],
+            env,
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -324,6 +483,144 @@ mod test_numeric {
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
+mod test_numeric_color {
+    use crate::helper::exec_target_with_env_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "numeric", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "numeric", "-r", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "-r",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "--color",
+                "always",
+            ],
+            env,
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
         assert_eq!(oup.status.success(), true);
@@ -442,6 +739,144 @@ mod test_version {
     }
 }
 
+mod test_version_color {
+    use crate::helper::exec_target_with_env_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "version", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "version", "-r", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-r",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:4:<S>4<E>:good:Oct\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "--color",
+                "always",
+            ],
+            env,
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
 mod test_month {
     use crate::helper::exec_target_with_in;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
@@ -548,7 +983,146 @@ mod test_month {
     }
 }
 
+mod test_month_color {
+    use crate::helper::exec_target_with_env_in;
+    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_t1() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "month", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t2() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["--according-to", "month", "-r", "--color", "always"],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert_eq!(oup.status.success(), false);
+    }
+    //
+    #[test]
+    fn test_t3() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t4() {
+        let env = env_1!();
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "-r",
+                "--color",
+                "always",
+            ],
+            env,
+            super::IN_DAT_FRUIT.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Cherry:4:4:good:<S>Oct<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_t5() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "--color",
+                "always",
+            ],
+            env,
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+}
+
 mod test_2 {
+    use crate::helper::exec_target_with_env_in;
     use crate::helper::exec_target_with_in;
     const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
     //
@@ -579,6 +1153,29 @@ mod test_2 {
                 "Cherry:4:4:good:Oct\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
+            )
+        );
+        assert_eq!(oup.status.success(), true);
+    }
+    //
+    #[test]
+    fn test_uniq_color() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let oup = exec_target_with_env_in(
+            TARGET_EXE_PATH,
+            &["-u", "--color", "always"],
+            env,
+            in_w.as_bytes(),
+        );
+        assert_eq!(oup.stderr, "");
+        assert_eq!(
+            oup.stdout,
+            concat!(
+                "<S>Apple:33:3.3:good:Mar<E>\n",
+                "<S>Cherry:4:4:good:Oct<E>\n",
+                "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
+                "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
         assert_eq!(oup.status.success(), true);

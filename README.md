@@ -20,15 +20,23 @@ sort lines of text.
 
 Ordering options:
   -r, --reverse                 reverse the result of comparisons
-      --according-to <word>     sort according to WORD: string, numeric, month, version
+      --according-to <word>     sort according to <word>
 
 Other options:
-  -e, --exp <exp>               regular expression. sort via this match point.
-  -u, --unique                  output only the first line of an equal.
-      --max-buffer <size>       max buffer size. if reading size is more than <size>, then it not output, quit and display error message.
+      --color <when>            use markers to highlight the matching strings
+  -e, --exp <exp>               regular expression. sort by the entires match
+  -u, --unique                  output only the first line of an equal
+      --max-buffer <size>       max buffer size
 
   -H, --help        display this help and exit
   -V, --version     display version information and exit
+
+Option Parameters:
+  <word>    'string', 'numeric', 'month', 'version'
+  <when>    'always', 'never', or 'auto'
+  <exp>     regular expression, sort by the entires match.
+  <size>    if a reading size is more than <size>, then it is not output,
+            quit and display error message.
 
 Examples:
   This sort via utf-8 code:
@@ -144,3 +152,7 @@ Cherry:4:4:good:Oct
 See [`fn execute()`] for this library examples.
 
 [`fn execute()`]: crate::execute
+
+## Changelogs
+
+[This crate's changelog here.](https://github.com/aki-akaguma/aki-resort/blob/main/CHANGELOG.md)
