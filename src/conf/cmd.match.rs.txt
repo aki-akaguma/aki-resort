@@ -6,6 +6,12 @@ match CmdOp::from(nv.opt.num) {
     CmdOp::AccordingTo => {
         conf.opt_according_to = value_to_opt_according_to_word(nv)?;
     }
+    CmdOp::Head => {
+        conf.opt_head = Some(value_to_usize(nv)?);
+    }
+    CmdOp::Tail => {
+        conf.opt_tail = Some(value_to_usize(nv)?);
+    }
     CmdOp::Color => {
         conf.opt_color = value_to_opt_color_when(nv)?;
     }

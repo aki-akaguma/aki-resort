@@ -2,6 +2,8 @@
 const OPTIONS_TEXT: &str = r"Ordering options:
   -r, --reverse                 reverse the result of comparisons
       --according-to <word>     sort according to <word>
+  -h, --head <num>              unsort the first <num> lines.
+  -t, --tail <num>              unsort the last <num> lines.
 
 Other options:
       --color <when>            use markers to highlight the matching strings
@@ -18,6 +20,8 @@ Other options:
 enum CmdOp {
     Reverse,
     AccordingTo,
+    Head,
+    Tail,
     Color,
     Exp,
     Unique,
@@ -38,20 +42,22 @@ impl CmdOp {
 }
 
 #[rustfmt::skip]
-const OPT_ARY: [Opt;8] = [
+const OPT_ARY: [Opt;10] = [
     Opt { sho: 0u8,  lon: "according-to",  has: Arg::Yes, num: CmdOp::AccordingTo.to(), },
     Opt { sho: 0u8,  lon: "color",         has: Arg::Yes, num: CmdOp::Color.to(), },
     Opt { sho: b'e', lon: "exp",           has: Arg::Yes, num: CmdOp::Exp.to(), },
+    Opt { sho: b'h', lon: "head",          has: Arg::Yes, num: CmdOp::Head.to(), },
     Opt { sho: b'H', lon: "help",          has: Arg::No,  num: CmdOp::Help.to(), },
     Opt { sho: 0u8,  lon: "max-buffer",    has: Arg::Yes, num: CmdOp::MaxBuffer.to(), },
     Opt { sho: b'r', lon: "reverse",       has: Arg::No,  num: CmdOp::Reverse.to(), },
+    Opt { sho: b't', lon: "tail",          has: Arg::Yes, num: CmdOp::Tail.to(), },
     Opt { sho: b'u', lon: "unique",        has: Arg::No,  num: CmdOp::Unique.to(), },
     Opt { sho: b'V', lon: "version",       has: Arg::No,  num: CmdOp::Version.to(), },
 ];
 
 #[rustfmt::skip]
-const OPT_ARY_SHO_IDX: [(u8,usize);5] = [
-(b'H',3),(b'V',7),(b'e',2),(b'r',5),(b'u',6),];
+const OPT_ARY_SHO_IDX: [(u8,usize);7] = [
+(b'H',4),(b'V',9),(b'e',2),(b'h',3),(b'r',6),(b't',7),(b'u',8),];
 
 #[derive(Debug, Default, PartialEq)]
 pub struct CmdOptConf {
@@ -59,6 +65,8 @@ pub struct CmdOptConf {
     //
     pub flg_reverse: bool,
     pub opt_according_to: OptAccordingToWord,
+    pub opt_head: Option<usize>,
+    pub opt_tail: Option<usize>,
     pub opt_color: OptColorWhen,
     pub opt_exp: String,
     pub flg_unique: bool,
@@ -81,6 +89,19 @@ impl flood_tide::HelpVersion for CmdOptConf {
 fn value_to_string(nv: &NameVal<'_>) -> Result<String, OptParseError> {
     match nv.val {
         Some(x) => Ok(x.to_string()),
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon)),
+    }
+}
+
+fn value_to_usize(nv: &NameVal<'_>) -> Result<usize, OptParseError> {
+    match nv.val {
+        Some(x) => match x.parse::<usize>() {
+            Ok(d) => Ok(d),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon,
+                &err.to_string(),
+            )),
+        },
         None => Err(OptParseError::missing_option_argument(&nv.opt.lon)),
     }
 }

@@ -2,6 +2,7 @@ use super::{KeyColumns, KeyLine, SortLinesBuffer};
 use anyhow::Context;
 use std::cmp::Ordering;
 
+#[derive(Debug)]
 pub struct SortLinesBufferNumeric {
     buf_lines: Vec<SortLine>,
     reverse: bool,

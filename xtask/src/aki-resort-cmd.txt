@@ -1,6 +1,8 @@
 Ordering options:
   -r, --reverse                 reverse the result of comparisons
       --according-to <word>     sort according to <word>
+  -h, --head <num>              unsort the first <num> lines.
+  -t, --tail <num>              unsort the last <num> lines.
 
 Other options:
       --color <when>            use markers to highlight the matching strings

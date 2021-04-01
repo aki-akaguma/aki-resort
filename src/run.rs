@@ -28,12 +28,14 @@ fn lines_loop<T>(
     sioe: &RunnelIoe,
     conf: &CmdOptConf,
     re: Option<Regex>,
-    mut buf_lines: T,
+    mut sort_buf_lines: T,
 ) -> anyhow::Result<Vec<KeyLine>>
 where
     T: crate::sort::SortLinesBuffer,
 {
     let mut curr_sz: usize = 0;
+    let mut result_buf_lines = Vec::new();
+    let mut buf_lines = Vec::new();
     //
     // read all lines
     for line in sioe.pin().lock().lines() {
@@ -45,6 +47,14 @@ where
         curr_sz += line_len;
         if !conf.opt_max_buffer.is_ok(curr_sz) {
             return Err(anyhow!("over max buffer size: {}", conf.opt_max_buffer));
+        }
+        //
+        if let Some(n) = conf.opt_head {
+            if result_buf_lines.len() < n {
+                let key = KeyColumns::new(0, 0);
+                result_buf_lines.push(KeyLine::new(key, line_s));
+                continue;
+            }
         }
         //
         let key = if let Some(ref re) = re {
@@ -62,11 +72,33 @@ where
         } else {
             KeyColumns::new(0, line_len)
         };
-        //
-        buf_lines.push_line(key, line_s)?;
+        buf_lines.push(KeyLine::new(key, line_s));
     }
-    // all lines
-    Ok(buf_lines.into_sorted_vec())
+    // remove footer
+    let mut footer = if let Some(n) = conf.opt_tail {
+        if n > 0 {
+            let at = buf_lines.len() - n;
+            let mut buf = buf_lines.split_off(at);
+            for v in buf.iter_mut() {
+                v.key = KeyColumns::new(0, 0);
+            }
+            buf
+        } else {
+            Vec::new()
+        }
+    } else {
+        Vec::new()
+    };
+    // sort body
+    for key_line in buf_lines {
+        sort_buf_lines.push_line(key_line.key, key_line.line)?;
+    }
+    // append all lines
+    let mut body = sort_buf_lines.into_sorted_vec();
+    result_buf_lines.append(&mut body);
+    result_buf_lines.append(&mut footer);
+    //
+    Ok(result_buf_lines)
 }
 
 fn run_0(
@@ -118,9 +150,11 @@ fn run_0(
             for key_line in v {
                 let mut out_s: String = String::new();
                 out_s.push_str(&key_line.line[0..key_line.key.st]);
-                out_s.push_str(color_start_s);
-                out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
-                out_s.push_str(color_end_s);
+                if key_line.key.st < key_line.key.ed {
+                    out_s.push_str(color_start_s);
+                    out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+                    out_s.push_str(color_end_s);
+                }
                 out_s.push_str(&key_line.line[key_line.key.ed..]);
                 #[rustfmt::skip]
                 sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
@@ -131,9 +165,11 @@ fn run_0(
                 if pre_line != key_line.line {
                     let mut out_s: String = String::new();
                     out_s.push_str(&key_line.line[0..key_line.key.st]);
-                    out_s.push_str(color_start_s);
-                    out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
-                    out_s.push_str(color_end_s);
+                    if key_line.key.st < key_line.key.ed {
+                        out_s.push_str(color_start_s);
+                        out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+                        out_s.push_str(color_end_s);
+                    }
                     out_s.push_str(&key_line.line[key_line.key.ed..]);
                     #[rustfmt::skip]
                     sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;

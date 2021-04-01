@@ -2,6 +2,10 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+* add option --head and --tail
+* bug fix: should not coloring at the empty match.
+* update depend: anyhow(1.0.40)
+
 0.1.8 (2021-03-22)
 =====
 

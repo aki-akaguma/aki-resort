@@ -11,6 +11,8 @@ macro_rules! help_msg {
             "Ordering options:\n",
             "  -r, --reverse                 reverse the result of comparisons\n",
             "      --according-to <word>     sort according to <word>\n",
+            "  -h, --head <num>              unsort the first <num> lines.\n",
+            "  -t, --tail <num>              unsort the last <num> lines.\n",
             "\n",
             "Other options:\n",
             "      --color <when>            use markers to highlight the matching strings\n",
@@ -151,6 +153,12 @@ macro_rules! env_1 {
     }};
 }
 
+const IN_DAT_FRUIT_HEADER: &str = "\
+name:number:version:nice:month
+";
+const IN_DAT_FRUIT_FOOTER: &str = "\
+This is footer line. 1
+";
 const IN_DAT_FRUIT: &str = "\
 Apple:33:3.3:good:Mar
 Orange:222:1.1.2:good:Jan
@@ -302,6 +310,42 @@ mod test_s_string {
         );
         assert_eq!(r.is_ok(), true);
     }
+    //
+    #[test]
+    fn test_t6_header() {
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-h", "1"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-t", "1"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "This is footer line. 1\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
 }
 
 mod test_s_string_color {
@@ -407,6 +451,52 @@ mod test_s_string_color {
         );
         assert_eq!(r.is_ok(), true);
     }
+    //
+    #[test]
+    fn test_t6_header() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &["-e", "[0-9]+", "-h", "1", "--color", "always"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &env,
+            &["-e", "[0-9]+", "-t", "1", "--color", "always"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "This is footer line. 1\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
 }
 
 mod test_s_numeric {
@@ -500,6 +590,48 @@ mod test_s_numeric {
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_header() {
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &["-e", "[0-9]+", "--according-to", "numeric", "-h", "1"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &["-e", "[0-9]+", "--according-to", "numeric", "-t", "1"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:4:4:good:Oct\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "This is footer line. 1\n",
             )
         );
         assert_eq!(r.is_ok(), true);
@@ -639,6 +771,70 @@ mod test_s_numeric_color {
         );
         assert_eq!(r.is_ok(), true);
     }
+    //
+    #[test]
+    fn test_t6_header() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "-h",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[0-9]+",
+                "--according-to",
+                "numeric",
+                "-t",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Cherry:<S>4<E>:4:good:Oct\n",
+                "Apple:<S>33<E>:3.3:good:Mar\n",
+                "Orange:<S>222<E>:1.1.2:good:Jan\n",
+                "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
+                "This is footer line. 1\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
 }
 
 mod test_s_version {
@@ -738,6 +934,62 @@ mod test_s_version {
                 "Apple:33:3.3:good:Mar\n",
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_header() {
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-h",
+                "1"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-t",
+                "1"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Cherry:4:4:good:Oct\n",
+                "This is footer line. 1\n",
             )
         );
         assert_eq!(r.is_ok(), true);
@@ -877,6 +1129,70 @@ mod test_s_version_color {
         );
         assert_eq!(r.is_ok(), true);
     }
+    //
+    #[test]
+    fn test_t6_header() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-h",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                "[^:]+:[^:]+:([0-9.]+):",
+                "--according-to",
+                "version",
+                "-t",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:<S>1.1.2<E>:good:Jan\n",
+                "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
+                "Apple:33:<S>3.3<E>:good:Mar\n",
+                "Cherry:4:<S>4<E>:good:Oct\n",
+                "This is footer line. 1\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
 }
 
 mod test_s_month {
@@ -970,6 +1286,48 @@ mod test_s_month {
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_header() {
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &["-e", ":([^:]+)$", "--according-to", "month", "-h", "1"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Cherry:4:4:good:Oct\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &["-e", ":([^:]+)$", "--according-to", "month", "-t", "1"],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:1.1.2:good:Jan\n",
+                "Apple:33:3.3:good:Mar\n",
+                "Kiwi:1111:1.1.11:good:Jun\n",
+                "Cherry:4:4:good:Oct\n",
+                "This is footer line. 1\n",
             )
         );
         assert_eq!(r.is_ok(), true);
@@ -1105,6 +1463,70 @@ mod test_s_month_color {
                 "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
                 "Cherry:4:4:good:<S>Oct<E>\n",
                 "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_header() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "-h",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "name:number:version:nice:month\n",
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+            )
+        );
+        assert_eq!(r.is_ok(), true);
+    }
+    //
+    #[test]
+    fn test_t6_footer() {
+        let env = env_1!();
+        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let (r, sioe) = do_execute!(
+            &env,
+            &[
+                "-e",
+                ":([^:]+)$",
+                "--according-to",
+                "month",
+                "-t",
+                "1",
+                "--color",
+                "always"
+            ],
+            in_w.as_str(),
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "Orange:222:1.1.2:good:<S>Jan<E>\n",
+                "Apple:33:3.3:good:<S>Mar<E>\n",
+                "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
+                "Cherry:4:4:good:<S>Oct<E>\n",
+                "This is footer line. 1\n",
             )
         );
         assert_eq!(r.is_ok(), true);
