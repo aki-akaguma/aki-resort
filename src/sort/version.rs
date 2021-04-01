@@ -3,6 +3,7 @@ use anyhow::Context;
 use semver::{SemVerError, Version};
 use std::cmp::Ordering;
 
+#[derive(Debug)]
 pub struct SortLinesBufferVersion {
     buf_lines: Vec<SortLine>,
     reverse: bool,

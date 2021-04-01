@@ -21,6 +21,8 @@ sort lines of text.
 Ordering options:
   -r, --reverse                 reverse the result of comparisons
       --according-to <word>     sort according to <word>
+  -h, --head <num>              unsort the first <num> lines.
+  -t, --tail <num>              unsort the last <num> lines.
 
 Other options:
       --color <when>            use markers to highlight the matching strings
@@ -145,6 +147,25 @@ Orange:222:1.1.2:good:Jan
 Apple:33:3.3:good:Mar
 Kiwi:1111:1.1.11:good:Jun
 Cherry:4:4:good:Oct
+```
+
+### Example 5: numeric sort with the header
+
+This sort via 1st chunk of numeric character according to numeric.
+And the 1st line is the fixed header.
+
+command line:
+```
+cat fixtures/fruit_header.txt | aki-resort -e "[0-9]+" --according-to numeric -h 1
+```
+
+result output:
+```
+name:number:version:nice:month
+Cherry:4:4:good:Oct
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Kiwi:1111:1.1.11:good:Jun
 ```
 
 ## Library example

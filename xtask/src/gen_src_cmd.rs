@@ -21,10 +21,8 @@ pub fn do_gen_src() -> anyhow::Result<()> {
 fn fix_type(vec_optstr: &mut [OptStr]) {
     for v in vec_optstr {
         let v_meta_type = match v.lon.as_str() {
-            /*
-            "connect-timeout" => MetaType::U32,
-            "continue-at" => MetaType::U64,
-            */
+            "head" => MetaType::Usize,
+            "tail" => MetaType::Usize,
             "according-to" => MetaType::Other("opt_according_to_word".to_string()),
             "color" => MetaType::Other("opt_color_when".to_string()),
             "max-buffer" => MetaType::Other("opt_max_buffer_size".to_string()),
@@ -41,5 +39,11 @@ fn fix_type(vec_optstr: &mut [OptStr]) {
         };
         v.is_vec = v_is_vec;
         */
+        let v_is_opt = match v.lon.as_str() {
+            "head" => true,
+            "tail" => true,
+            _ => false,
+        };
+        v.is_opt = v_is_opt;
     }
 }

@@ -44,5 +44,6 @@ mod debug {
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<KeyColumns>(), 16);
+        assert_eq!(std::mem::size_of::<KeyLine>(), 40);
     }
 }

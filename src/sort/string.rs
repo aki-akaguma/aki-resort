@@ -1,6 +1,7 @@
 use super::{KeyColumns, KeyLine, SortLinesBuffer};
 use std::cmp::Ordering;
 
+#[derive(Debug)]
 pub struct SortLinesBufferString {
     buf_lines: Vec<SortLine>,
     reverse: bool,
