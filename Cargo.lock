@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "aki-resort"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "anyhow",
  "atty",
@@ -112,15 +112,15 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "flood-tide"
-version = "0.1.21"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "301babf76cda470515c6b7cdc4730662d3f47a9dccda58d53145f2a7a89e42ed"
+checksum = "5c5a6ce2d4a1a36aff00d09c00a913bb5857429c8c9d9d0efb08d9f5bf01e908"
 
 [[package]]
 name = "flood-tide-gen"
-version = "0.1.6"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90af46a8a10c1da60a26e40b7aa59ff78d3f4099f72a790cf164914b459d7516"
+checksum = "8f1d4fb0bd05af971aa77546b4ecf8cf9c8e790f051938e16c42a8747873af88"
 dependencies = [
  "anyhow",
  "case",
@@ -144,9 +144,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56d855069fafbb9b344c0f962150cd2c1187975cb1c22c1522c240d8c4986714"
+checksum = "9385f66bf6105b241aa65a61cb923ef20efc665cb9f9bb50ac2f0c4b7f378d41"
 
 [[package]]
 name = "memchr"
@@ -226,9 +226,9 @@ checksum = "24d5f089152e60f62d28b835fbff2cd2e8dc0baf1ac13343bef92ab7eed84548"
 
 [[package]]
 name = "runnel"
-version = "0.3.4"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a04dde17e8efb4c2bd40ebc7030b229ccabc0ec35284c22d622e7edfe4235b87"
+checksum = "441aa3ad3718b852a4d3c741632d99c5e3a0ae62db5835c8778136f05ca1a3b0"
 dependencies = [
  "rustc_version",
 ]
