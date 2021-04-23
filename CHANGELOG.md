@@ -2,6 +2,13 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.12 (2021-04-23)
+=====
+
+* update depends: flood-tide-gen(0.1.12), flood-tide(0.2.1)
+* add command option: -X
+* update depends: bug fix: regex(1.4.6)
+
 0.1.11 (2021-04-19)
 =====
 

@@ -1,6 +1,6 @@
 [package]
 name = "aki-resort"
-version = "0.1.11"
+version = "0.1.12"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 sort lines of text. You can use regex to specify the KEY.
@@ -38,6 +38,7 @@ rayon = "1.5"
 [dev-dependencies]
 
 [build-dependencies]
+rust-version-info-file = "0.1"
 rustc_version = "0.3"
 
 [workspace]
@@ -54,6 +55,9 @@ extended-description = """\
 This program sort lines of text. You can use regex to specify the KEY.
 """
 depends = "$auto"
+separate-debug-symbols = true
 assets = [
     ["target/release/aki-resort", "usr/bin/aki-resort", "755"],
+    ["target/rust-version-info.txt", "usr/share/doc/aki-resort/", "644"],
+    ["README.md", "usr/share/doc/aki-resort/", "644"],
 ]

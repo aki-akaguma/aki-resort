@@ -17,6 +17,8 @@ pub fn do_gen_src() -> anyhow::Result<()> {
                 ),
                 "color" => (false, false, MetaType::Other("opt_color_when".into())),
                 "max-buffer" => (false, false, MetaType::Other("opt_max_buffer_size".into())),
+                //
+                "X" => (false, true, MetaType::Other("opt_uc_x_param".into())),
                 _ => return None,
             };
             Some(FixupType::from_tuple(tup))
