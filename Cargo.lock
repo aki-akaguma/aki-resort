@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "aki-resort"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "anyhow",
  "atty",
@@ -20,6 +20,7 @@ dependencies = [
  "rayon",
  "regex",
  "runnel",
+ "rust-version-info-file",
  "rustc_version",
  "semver",
 ]
@@ -112,15 +113,15 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "flood-tide"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c5a6ce2d4a1a36aff00d09c00a913bb5857429c8c9d9d0efb08d9f5bf01e908"
+checksum = "4acfe0a348b6401ba7f45cb71ff59ea73a3be325b4eeb30594bfe70bc116fb74"
 
 [[package]]
 name = "flood-tide-gen"
-version = "0.1.10"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "469e18a69e9e1114705aae74ba817afaa445c2f57a54985e3b6f61865c91f179"
+checksum = "37f94ddabe5084c2cf9afe9511f90789aefab008a74918b68e5fa7d551476a55"
 dependencies = [
  "anyhow",
  "case",
@@ -209,9 +210,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.4.5"
+version = "1.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "957056ecddbeba1b26965114e191d2e8589ce74db242b6ea25fc4062427a5c19"
+checksum = "2a26af418b574bd56588335b3a3659a65725d4e636eb1016c2f9e3b38c7cc759"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -232,6 +233,12 @@ checksum = "441aa3ad3718b852a4d3c741632d99c5e3a0ae62db5835c8778136f05ca1a3b0"
 dependencies = [
  "rustc_version",
 ]
+
+[[package]]
+name = "rust-version-info-file"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f6b6a1c043feecb3db1f7d5f73bbccd2b02628f8f5470e49cc0555878aea1a3"
 
 [[package]]
 name = "rustc_version"

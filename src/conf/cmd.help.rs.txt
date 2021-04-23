@@ -13,6 +13,7 @@ Other options:
 
   -H, --help        display this help and exit
   -V, --version     display version information and exit
+  -X <x-options>    x options. try -X help
 ";
 
 #[repr(u8)]
@@ -28,6 +29,7 @@ enum CmdOp {
     MaxBuffer,
     Help,
     Version,
+    UcX,
 }
 
 impl std::convert::From<u8> for CmdOp {
@@ -42,7 +44,8 @@ impl CmdOp {
 }
 
 #[rustfmt::skip]
-const OPT_ARY: [Opt;10] = [
+const OPT_ARY: [Opt;11] = [
+    Opt { sho: b'X', lon: "",              has: Arg::Yes, num: CmdOp::UcX.to(), },
     Opt { sho: 0u8,  lon: "according-to",  has: Arg::Yes, num: CmdOp::AccordingTo.to(), },
     Opt { sho: 0u8,  lon: "color",         has: Arg::Yes, num: CmdOp::Color.to(), },
     Opt { sho: b'e', lon: "exp",           has: Arg::Yes, num: CmdOp::Exp.to(), },
@@ -56,8 +59,8 @@ const OPT_ARY: [Opt;10] = [
 ];
 
 #[rustfmt::skip]
-const OPT_ARY_SHO_IDX: [(u8,usize);7] = [
-(b'H',4),(b'V',9),(b'e',2),(b'h',3),(b'r',6),(b't',7),(b'u',8),];
+const OPT_ARY_SHO_IDX: [(u8,usize);8] = [
+(b'H',5),(b'V',10),(b'X',0),(b'e',3),(b'h',4),(b'r',7),(b't',8),(b'u',9),];
 
 #[derive(Debug, Default, PartialEq)]
 pub struct CmdOptConf {
@@ -73,6 +76,7 @@ pub struct CmdOptConf {
     pub opt_max_buffer: OptMaxBufferSize,
     pub flg_help: bool,
     pub flg_version: bool,
+    pub opt_uc_x: Vec<OptUcXParam>,
     //
     pub arg_params: Vec<String>,
 }
@@ -89,7 +93,7 @@ impl flood_tide::HelpVersion for CmdOptConf {
 fn value_to_string(nv: &NameVal<'_>) -> Result<String, OptParseError> {
     match nv.val {
         Some(x) => Ok(x.to_string()),
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon)),
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
     }
 }
 
@@ -98,10 +102,62 @@ fn value_to_usize(nv: &NameVal<'_>) -> Result<usize, OptParseError> {
         Some(x) => match x.parse::<usize>() {
             Ok(d) => Ok(d),
             Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon,
+                &nv.opt.lon_or_sho(),
                 &err.to_string(),
             )),
         },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon)),
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
+    }
+}
+
+fn value_to_opt_according_to_word(nv: &NameVal<'_>) -> Result<OptAccordingToWord, OptParseError> {
+    match nv.val {
+        Some(s) => match FromStr::from_str(s) {
+            Ok(x) => Ok(x),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon_or_sho(),
+                &err.to_string(),
+            )),
+        },
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
+    }
+}
+
+fn value_to_opt_color_when(nv: &NameVal<'_>) -> Result<OptColorWhen, OptParseError> {
+    match nv.val {
+        Some(s) => match FromStr::from_str(s) {
+            Ok(x) => Ok(x),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon_or_sho(),
+                &err.to_string(),
+            )),
+        },
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
+    }
+}
+
+fn value_to_opt_max_buffer_size(nv: &NameVal<'_>) -> Result<OptMaxBufferSize, OptParseError> {
+    match nv.val {
+        Some(s) => match FromStr::from_str(s) {
+            Ok(x) => Ok(x),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon_or_sho(),
+                &err.to_string(),
+            )),
+        },
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
+    }
+}
+
+fn value_to_opt_uc_x_param(nv: &NameVal<'_>) -> Result<OptUcXParam, OptParseError> {
+    match nv.val {
+        Some(s) => match FromStr::from_str(s) {
+            Ok(x) => Ok(x),
+            Err(err) => Err(OptParseError::invalid_option_argument(
+                &nv.opt.lon_or_sho(),
+                &err.to_string(),
+            )),
+        },
+        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
     }
 }
