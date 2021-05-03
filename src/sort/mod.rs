@@ -41,9 +41,16 @@ pub(crate) trait SortLinesBuffer {
 #[cfg(test)]
 mod debug {
     use super::*;
+    #[cfg(target_pointer_width = "64")]
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<KeyColumns>(), 16);
         assert_eq!(std::mem::size_of::<KeyLine>(), 40);
+    }
+    #[cfg(target_pointer_width = "32")]
+    #[test]
+    fn size_of() {
+        assert_eq!(std::mem::size_of::<KeyColumns>(), 8);
+        assert_eq!(std::mem::size_of::<KeyLine>(), 20);
     }
 }

@@ -101,9 +101,16 @@ impl Eq for SortLine {}
 #[cfg(test)]
 mod debug {
     use super::*;
+    #[cfg(target_pointer_width = "64")]
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferVersion>(), 32);
         assert_eq!(std::mem::size_of::<SortLine>(), 120);
+    }
+    #[cfg(target_pointer_width = "32")]
+    #[test]
+    fn size_of() {
+        assert_eq!(std::mem::size_of::<SortLinesBufferVersion>(), 16);
+        assert_eq!(std::mem::size_of::<SortLine>(), 72);
     }
 }

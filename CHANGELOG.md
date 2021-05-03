@@ -2,6 +2,13 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.14 (2021-05-03)
+=====
+
+* bug fix: this arithmetic operation will overflow: 1024 * 1024 * 1024 * 1024 on i686
+* add support 32bit cpus: i686, armv7, mipsel
+* update depends: regex(1.5.3)
+
 0.1.13 (2021-04-23)
 =====
 
