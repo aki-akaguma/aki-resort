@@ -9,5 +9,5 @@ fn main() {
         println!("cargo:rustc-cfg=has_not_matches");
     }
     //
-    rust_version_info_file("target/rust-version-info.txt");
+    rust_version_info_file("target/rust-version-info.txt", "Cargo.toml");
 }

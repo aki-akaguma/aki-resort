@@ -25,7 +25,7 @@ impl CmdOptConf {
     }
     pub fn is_opt_uc_x_package_version_info(&self) -> bool {
         for o in self.opt_uc_x.iter() {
-            if let OptUcXParam::PackageVersionInfo = o {
+            if let OptUcXParam::RustVersionInfo = o {
                 return true;
             }
         }
