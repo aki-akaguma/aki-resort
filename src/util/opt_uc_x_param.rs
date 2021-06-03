@@ -3,7 +3,7 @@
 pub enum OptUcXParam {
     Void,
     Help,
-    PackageVersionInfo,
+    RustVersionInfo,
     BaseDir(String),
 }
 
@@ -19,7 +19,7 @@ impl ::std::str::FromStr for OptUcXParam {
         let oc = match s {
             "void" => OptUcXParam::Void,
             "help" => OptUcXParam::Help,
-            "package-version-info" => OptUcXParam::PackageVersionInfo,
+            "rust-version-info" => OptUcXParam::RustVersionInfo,
             _ => {
                 let bs = "base_dir=";
                 if let Some(stripped) = s.strip_prefix(bs) {
@@ -39,7 +39,7 @@ impl ::std::fmt::Display for OptUcXParam {
         let s = match *self {
             OptUcXParam::Void => "void",
             OptUcXParam::Help => "help",
-            OptUcXParam::PackageVersionInfo => "package-version-info",
+            OptUcXParam::RustVersionInfo => "rust-version-info",
             OptUcXParam::BaseDir(_) => "base_dir=",
         };
         write!(f, "{}", s)

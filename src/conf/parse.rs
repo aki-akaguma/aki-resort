@@ -60,7 +60,7 @@ fn help_message(program: &str) -> String {
 fn opt_uc_x_help_message(_program: &str) -> String {
     let z_opts = concat!(
         "Options:\n",
-        "  -X rust-version-info     display package version info and exit\n",
+        "  -X rust-version-info     display rust version info and exit\n",
         "  -X base_dir=<path>       set <path> is base directory\n",
     );
     z_opts.to_string()
@@ -68,18 +68,23 @@ fn opt_uc_x_help_message(_program: &str) -> String {
 
 #[rustfmt::skip]
 fn opt_uc_x_package_version_info(_program: &str) -> String {
-    use std::io::Read;
-    let mut string = String::new();
-    let fnm = format!("/usr/share/doc/{}/rust-version-info.txt", env!("CARGO_PKG_NAME"));
-    let file = std::fs::File::open(&fnm);
-    match file {
-        Ok(mut f) => {
-            f.read_to_string(&mut string).unwrap();
-            string
-        },
-        Err(err) => {
-            format!("ERROR: {}: '{}'", err, fnm)
-        },
+    if cfg!(feature = "debian_build") {
+        use std::io::Read;
+        let mut string = String::new();
+        let fnm = format!("/usr/share/doc/{}/rust-version-info.txt", env!("CARGO_PKG_NAME"));
+        let file = std::fs::File::open(&fnm);
+        match file {
+            Ok(mut f) => {
+                f.read_to_string(&mut string).unwrap();
+                string
+            },
+            Err(err) => {
+                format!("ERROR: {}: '{}'", err, fnm)
+            },
+        }
+    } else {
+        const VS: &str = include_str!("../../target/rust-version-info.txt");
+        VS.to_string()
     }
 }
 
