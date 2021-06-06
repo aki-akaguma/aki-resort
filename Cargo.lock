@@ -11,7 +11,7 @@ dependencies = [
 
 [[package]]
 name = "aki-resort"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "anyhow",
  "atty",
@@ -22,7 +22,7 @@ dependencies = [
  "runnel",
  "rust-version-info-file",
  "rustc_version",
- "semver",
+ "semver 1.0.3",
 ]
 
 [[package]]
@@ -245,7 +245,7 @@ version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0dfe2087c51c460008730de8b57e6a320782fbfb312e1f4d520e6c6fae155ee"
 dependencies = [
- "semver",
+ "semver 0.11.0",
 ]
 
 [[package]]
@@ -262,6 +262,12 @@ checksum = "f301af10236f6df4160f7c3f04eec6dbc70ace82d23326abad5edee88801c6b6"
 dependencies = [
  "semver-parser",
 ]
+
+[[package]]
+name = "semver"
+version = "1.0.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f3aac57ee7f3272d8395c6e4f502f434f0e289fcd62876f70daa008c20dcabe"
 
 [[package]]
 name = "semver-parser"
