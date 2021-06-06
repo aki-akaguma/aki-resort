@@ -853,7 +853,7 @@ mod test_version {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+                ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
         assert_eq!(oup.stdout, "");
@@ -871,7 +871,7 @@ mod test_version {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+                ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
         assert_eq!(oup.stdout, "");
@@ -1025,7 +1025,7 @@ mod test_version_color {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+                ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
         assert_eq!(oup.stdout, "");
@@ -1045,7 +1045,7 @@ mod test_version_color {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': lexer error: UnexpectedChar(\':\')\n",
+                ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
         assert_eq!(oup.stdout, "");

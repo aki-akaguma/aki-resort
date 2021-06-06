@@ -1,6 +1,6 @@
 use super::{KeyColumns, KeyLine, SortLinesBuffer};
 use anyhow::Context;
-use semver::{SemVerError, Version};
+use semver::{Error, Version};
 use std::cmp::Ordering;
 
 #[derive(Debug)]
@@ -56,13 +56,22 @@ impl SortLine {
     }
 }
 
-fn make_version(s: &str) -> Result<Version, SemVerError> {
+fn make_version(s: &str) -> Result<Version, Error> {
     match Version::parse(s) {
         Ok(ver) => Ok(ver),
-        Err(SemVerError::ParseError(ref msg)) if msg.as_str() == "expected more input" => {
-            make_version((s.to_string() + ".0").as_str())
-        }
-        Err(err) => Err(err),
+        Err(err) => {
+            match err.to_string().as_str() {
+                "unexpected end of input while parsing major version number" => {
+                    make_version((s.to_string() + ".0.0").as_str())
+                }
+                "unexpected end of input while parsing minor version number" => {
+                    make_version((s.to_string() + ".0").as_str())
+                }
+                _ => {
+                    Err(err)
+                }
+            }
+        },
     }
 }
 
@@ -105,7 +114,7 @@ mod debug {
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferVersion>(), 32);
-        assert_eq!(std::mem::size_of::<SortLine>(), 120);
+        assert_eq!(std::mem::size_of::<SortLine>(), 88);
     }
     #[cfg(target_pointer_width = "32")]
     #[test]

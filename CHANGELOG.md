@@ -2,6 +2,11 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.16 (2021-06-06)
+=====
+
+* update depends: semver(1.0.3)
+
 0.1.15 (2021-06-03)
 =====
 
