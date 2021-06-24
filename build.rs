@@ -9,5 +9,13 @@ fn main() {
         println!("cargo:rustc-cfg=has_not_matches");
     }
     //
-    rust_version_info_file("target/rust-version-info.txt", "Cargo.toml");
+    let path = {
+        #[cfg(feature = "debian_build")]
+        let dir = "target".to_string();
+        #[cfg(not(feature = "debian_build"))]
+        let dir = std::env::var("OUT_DIR").unwrap();
+        //
+        format!("{}/rust-version-info.txt", dir)
+    };
+    rust_version_info_file(path.as_str(), "Cargo.toml");
 }
