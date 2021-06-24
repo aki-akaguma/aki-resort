@@ -68,7 +68,8 @@ fn opt_uc_x_help_message(_program: &str) -> String {
 
 #[rustfmt::skip]
 fn opt_uc_x_package_version_info(_program: &str) -> String {
-    if cfg!(feature = "debian_build") {
+    #[cfg(feature = "debian_build")]
+    {
         use std::io::Read;
         let mut string = String::new();
         let fnm = format!("/usr/share/doc/{}/rust-version-info.txt", env!("CARGO_PKG_NAME"));
@@ -82,8 +83,10 @@ fn opt_uc_x_package_version_info(_program: &str) -> String {
                 format!("ERROR: {}: '{}'", err, fnm)
             },
         }
-    } else {
-        const VS: &str = include_str!("../../target/rust-version-info.txt");
+    }
+    #[cfg(not(feature = "debian_build"))]
+    {
+        const VS: &str = include_str!(concat!(env!("OUT_DIR"), "/rust-version-info.txt"));
         VS.to_string()
     }
 }

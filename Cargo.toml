@@ -1,6 +1,6 @@
 [package]
 name = "aki-resort"
-version = "0.1.16"
+version = "0.1.17"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 sort lines of text. You can use regex to specify the KEY.
@@ -33,6 +33,7 @@ flood-tide = { version="0.2", default-features=true, features=["stop_at_mm"] }
 lazy_static = "1.4"
 regex = "1.5"
 runnel = "0.3"
+memx-cdy = "0.1"
 semver = "1.0"
 rayon = "1.5"
 
@@ -40,7 +41,7 @@ rayon = "1.5"
 
 [build-dependencies]
 rust-version-info-file = "0.1"
-rustc_version = "0.3"
+rustc_version = "0.4"
 
 [workspace]
 members = [
