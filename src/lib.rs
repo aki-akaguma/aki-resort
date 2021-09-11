@@ -156,6 +156,8 @@ extern crate anyhow;
 pub mod conf;
 mod run;
 mod sort;
+
+#[macro_use]
 mod util;
 
 use flood_tide::HelpVersion;
@@ -222,5 +224,5 @@ pub fn execute_env(
             return Err(anyhow!("{}\n{}", errs, TRY_HELP_MSG));
         }
     };
-    run::run(sioe, &conf, &env)
+    run::run(sioe, &conf, env)
 }

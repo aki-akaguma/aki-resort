@@ -24,9 +24,9 @@ impl SortLinesBuffer for SortLinesBufferNumeric {
     fn into_sorted_vec(mut self) -> Vec<KeyLine> {
         use rayon::slice::ParallelSliceMut;
         if !self.reverse {
-            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(&b));
+            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(b));
         } else {
-            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(&a));
+            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(a));
         }
         let mut ret_vec = Vec::with_capacity(self.buf_lines.len());
         for sort_line in self.buf_lines.into_iter() {

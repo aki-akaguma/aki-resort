@@ -3,43 +3,47 @@ macro_rules! help_msg {
         concat!(
             version_msg!(),
             "\n",
-            "Usage:\n",
-            "  aki-resort [options]\n",
-            "\n",
-            "sort lines of text.\n",
-            "\n",
-            "Ordering options:\n",
-            "  -r, --reverse                 reverse the result of comparisons\n",
-            "      --according-to <word>     sort according to <word>\n",
-            "  -h, --head <num>              unsort the first <num> lines.\n",
-            "  -t, --tail <num>              unsort the last <num> lines.\n",
-            "\n",
-            "Other options:\n",
-            "      --color <when>            use markers to highlight the matching strings\n",
-            "  -e, --exp <exp>               regular expression. sort by the entires match\n",
-            "  -u, --unique                  output only the first line of an equal\n",
-            "      --max-buffer <size>       max buffer size\n",
-            "\n",
-            "  -H, --help        display this help and exit\n",
-            "  -V, --version     display version information and exit\n",
-            "  -X <x-options>    x options. try -X help\n",
-            "\n",
-            "Option Parameters:\n",
-            "  <word>    'string', 'numeric', 'month', 'version'\n",
-            "  <when>    'always', 'never', or 'auto'\n",
-            "  <exp>     regular expression, sort by the entires match.\n",
-            "  <size>    if a reading size is more than <size>, then it is not output,\n",
-            "            quit and display error message.\n",
-            "\n",
-            "Environments:\n",
-            "  AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi\n",
-            "  AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi\n",
-            "\n",
-            "Examples:\n",
-            "  This sort via utf-8 code:\n",
-            "    cat file1.txt | aki-resort\n",
-            "  This sort via 1st chunk of numeric character according to numeric:\n",
-            "    cat file1.txt | aki-resort -e \"[0-9]+\" --according-to numeric\n",
+            indoc::indoc!(
+                r#"
+            Usage:
+              aki-resort [options]
+
+            sort lines of text.
+
+            Ordering options:
+              -r, --reverse                 reverse the result of comparisons
+                  --according-to <word>     sort according to <word>
+              -h, --head <num>              unsort the first <num> lines.
+              -t, --tail <num>              unsort the last <num> lines.
+
+            Other options:
+                  --color <when>            use markers to highlight the matching strings
+              -e, --exp <exp>               regular expression. sort by the entires match
+              -u, --unique                  output only the first line of an equal
+                  --max-buffer <size>       max buffer size
+
+              -H, --help        display this help and exit
+              -V, --version     display version information and exit
+              -X <x-options>    x options. try -X help
+
+            Option Parameters:
+              <word>    'string', 'numeric', 'month', 'version'
+              <when>    'always', 'never', or 'auto'
+              <exp>     regular expression, sort by the entires match.
+              <size>    if a reading size is more than <size>, then it is not output,
+                        quit and display error message.
+
+            Environments:
+              AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi
+              AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi
+
+            Examples:
+              This sort via utf-8 code:
+                cat file1.txt | aki-resort
+              This sort via 1st chunk of numeric character according to numeric:
+                cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
+            "#
+            ),
             "\n",
         )
     };

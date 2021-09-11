@@ -109,11 +109,7 @@ fn run_0(
 ) -> anyhow::Result<()> {
     let color_start_s = env.color_seq_start.as_str();
     let color_end_s = env.color_seq_end.as_str();
-    let color_is_alyways = if let OptColorWhen::Always = conf.opt_color {
-        true
-    } else {
-        false
-    };
+    let color_is_alyways = crate::my_matches!(conf.opt_color, OptColorWhen::Always);
     let flg_r = conf.flg_reverse;
     let v = match conf.opt_according_to {
         OptAccordingToWord::String => {
@@ -145,9 +141,23 @@ fn run_0(
                 }
             }
         }
+    } else if !conf.flg_unique {
+        for key_line in v {
+            let mut out_s: String = String::new();
+            out_s.push_str(&key_line.line[0..key_line.key.st]);
+            if key_line.key.st < key_line.key.ed {
+                out_s.push_str(color_start_s);
+                out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+                out_s.push_str(color_end_s);
+            }
+            out_s.push_str(&key_line.line[key_line.key.ed..]);
+            #[rustfmt::skip]
+            sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
+        }
     } else {
-        if !conf.flg_unique {
-            for key_line in v {
+        let mut pre_line = String::new();
+        for key_line in v {
+            if pre_line != key_line.line {
                 let mut out_s: String = String::new();
                 out_s.push_str(&key_line.line[0..key_line.key.st]);
                 if key_line.key.st < key_line.key.ed {
@@ -158,23 +168,7 @@ fn run_0(
                 out_s.push_str(&key_line.line[key_line.key.ed..]);
                 #[rustfmt::skip]
                 sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
-            }
-        } else {
-            let mut pre_line = String::new();
-            for key_line in v {
-                if pre_line != key_line.line {
-                    let mut out_s: String = String::new();
-                    out_s.push_str(&key_line.line[0..key_line.key.st]);
-                    if key_line.key.st < key_line.key.ed {
-                        out_s.push_str(color_start_s);
-                        out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
-                        out_s.push_str(color_end_s);
-                    }
-                    out_s.push_str(&key_line.line[key_line.key.ed..]);
-                    #[rustfmt::skip]
-                    sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
-                    pre_line = key_line.line;
-                }
+                pre_line = key_line.line;
             }
         }
     }

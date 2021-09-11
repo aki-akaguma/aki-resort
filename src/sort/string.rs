@@ -23,9 +23,9 @@ impl SortLinesBuffer for SortLinesBufferString {
     fn into_sorted_vec(mut self) -> Vec<KeyLine> {
         use rayon::slice::ParallelSliceMut;
         if !self.reverse {
-            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(&b));
+            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(b));
         } else {
-            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(&a));
+            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(a));
         }
         let mut ret_vec = Vec::with_capacity(self.buf_lines.len());
         for sort_line in self.buf_lines.into_iter() {
@@ -60,7 +60,7 @@ impl PartialOrd for SortLine {
     fn partial_cmp(&self, other: &SortLine) -> Option<Ordering> {
         let one = self.key_str();
         let two = other.key_str();
-        let r = one.cmp(&two);
+        let r = one.cmp(two);
         let r = match r {
             Ordering::Equal => self.num.cmp(&other.num),
             _ => r,
@@ -74,7 +74,7 @@ impl Ord for SortLine {
     fn cmp(&self, other: &SortLine) -> Ordering {
         let one = self.key_str();
         let two = other.key_str();
-        let r = one.cmp(&two);
+        let r = one.cmp(two);
         match r {
             Ordering::Equal => self.num.cmp(&other.num),
             _ => r,

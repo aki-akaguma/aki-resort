@@ -1,4 +1,5 @@
 #[cfg(has_not_matches)]
+#[macro_export]
 macro_rules! my_matches {
     ($expression:expr, $( $pattern:pat )|+ $( if $guard: expr )? $(,)?) => {
         match $expression {
@@ -8,6 +9,7 @@ macro_rules! my_matches {
     }
 }
 #[cfg(not(has_not_matches))]
+#[macro_export]
 macro_rules! my_matches {
     ($expression:expr, $( $pattern:pat )|+ $( if $guard: expr )? $(,)?) => {
         matches!($expression, $( $pattern )|+ $( if $guard )?)
@@ -21,7 +23,7 @@ pub trait BrokenPipeError {
 impl BrokenPipeError for anyhow::Error {
     fn is_broken_pipe(&self) -> bool {
         my_matches!(self.downcast_ref::<std::io::Error>(),
-            Some(ref ioe) if ioe.kind() == std::io::ErrorKind::BrokenPipe)
+            Some(ioe) if ioe.kind() == std::io::ErrorKind::BrokenPipe)
     }
 }
 

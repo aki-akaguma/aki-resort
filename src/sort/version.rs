@@ -25,9 +25,9 @@ impl SortLinesBuffer for SortLinesBufferVersion {
     fn into_sorted_vec(mut self) -> Vec<KeyLine> {
         use rayon::slice::ParallelSliceMut;
         if !self.reverse {
-            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(&b));
+            self.buf_lines.par_sort_unstable_by(|a, b| a.cmp(b));
         } else {
-            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(&a));
+            self.buf_lines.par_sort_unstable_by(|a, b| b.cmp(a));
         }
         let mut ret_vec = Vec::with_capacity(self.buf_lines.len());
         for sort_line in self.buf_lines.into_iter() {
@@ -59,18 +59,14 @@ impl SortLine {
 fn make_version(s: &str) -> Result<Version, Error> {
     match Version::parse(s) {
         Ok(ver) => Ok(ver),
-        Err(err) => {
-            match err.to_string().as_str() {
-                "unexpected end of input while parsing major version number" => {
-                    make_version((s.to_string() + ".0.0").as_str())
-                }
-                "unexpected end of input while parsing minor version number" => {
-                    make_version((s.to_string() + ".0").as_str())
-                }
-                _ => {
-                    Err(err)
-                }
+        Err(err) => match err.to_string().as_str() {
+            "unexpected end of input while parsing major version number" => {
+                make_version((s.to_string() + ".0.0").as_str())
             }
+            "unexpected end of input while parsing minor version number" => {
+                make_version((s.to_string() + ".0").as_str())
+            }
+            _ => Err(err),
         },
     }
 }

@@ -174,7 +174,7 @@ mod tests {
             Ok(c) => {
                 let _col: OptMaxBufferSize = c;
                 unreachable!();
-            },
+            }
             Err(err) => {
                 assert_eq!(format!("{}", err), "can not parse \'123t\': overflow");
             }
@@ -202,7 +202,7 @@ mod tests {
             Ok(c) => {
                 let _col: OptMaxBufferSize = c;
                 unreachable!();
-            },
+            }
             Err(err) => {
                 assert_eq!(format!("{}", err), "can not parse \'123p\': overflow");
             }
