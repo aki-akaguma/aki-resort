@@ -2,6 +2,15 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.19 (2021-11-15)
+=====
+
+* minimum support rustc 1.47.0 (18bf6b4f0 2020-10-07)
+* add more documents
+* update depends: flood-tide(0.2.4), memx(0.1.18), memx-cdy(0.1.7), runnel(0.3.9)
+* update depends: anyhow(1.0.45), libc(0.2.107)
+* update depends: exec-target(v0.2.4), flood-tide-gen(0.1.15), rust-version-info-file(v0.1.3)
+
 0.1.18 (2021-09-11)
 =====
 

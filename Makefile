@@ -1,7 +1,11 @@
 
-all:
+all: README.md
 
-test-all:
+README.md: src/lib.rs
+	cargo readme > $@
+
+test:
+	cargo test
 
 clean:
 	cargo clean

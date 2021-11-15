@@ -1,18 +1,19 @@
 # aki-resort
 
-*aki-resort* sort lines of text.
+sort lines of text. You can use regex to specify the KEY.
 
 ## Features
 
-*aki-resort*  sort lines of text. You can use regex to specify the KEY.
+- sort lines of text. You can use regex to specify the KEY.
+- minimum support rustc 1.47.0 (18bf6b4f0 2020-10-07)
 
-* command help
+## Command help
 
-```text
+```
 aki-resort --help
 ```
 
-```text
+```
 Usage:
   aki-resort [options]
 
@@ -40,6 +41,10 @@ Option Parameters:
   <size>    if a reading size is more than <size>, then it is not output,
             quit and display error message.
 
+Environments:
+  AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi
+  AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi
+
 Examples:
   This sort via utf-8 code:
     cat file1.txt | aki-resort
@@ -47,19 +52,17 @@ Examples:
     cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
 ```
 
-* minimum support rustc 1.38.0
-
 ## Quick install
 
 1. you can install this into cargo bin path:
 
-```text
+```
 cargo install aki-resort
 ```
 
 2. you can build debian package:
 
-```text
+```
 cargo deb
 ```
 
@@ -174,6 +177,17 @@ See [`fn execute()`] for this library examples.
 
 [`fn execute()`]: crate::execute
 
-## Changelogs
+# Changelogs
 
 [This crate's changelog here.](https://github.com/aki-akaguma/aki-resort/blob/main/CHANGELOG.md)
+
+# License
+
+This project is licensed under either of
+
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
+   https://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or
+   https://opensource.org/licenses/MIT)
+
+at your option.
