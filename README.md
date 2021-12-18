@@ -35,7 +35,7 @@ Other options:
   -V, --version     display version information and exit
 
 Option Parameters:
-  <word>    'string', 'numeric', 'month', 'version'
+  <word>    'month', 'numeric', 'string', 'time', 'version'
   <when>    'always', 'never', or 'auto'
   <exp>     regular expression, sort by the entires match.
   <size>    if a reading size is more than <size>, then it is not output,
@@ -50,6 +50,12 @@ Examples:
     cat file1.txt | aki-resort
   This sort via 1st chunk of numeric character according to numeric:
     cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
+  This sort via 1st chunk of numeric character according to month:
+    cat file1.txt | aki-resort -e ":([^:]+)$" --according-to month
+  This sort via 1st chunk of numeric version character according to version:
+    cat file1.txt | aki-resort -e "[^:]+:[^:]+:([0-9.]+):" --according-to version
+  This sort via 1st chunk of numeric time character according to time:
+    cat file1.txt | aki-resort -e "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)" --according-to time
 ```
 
 ## Quick install
@@ -152,7 +158,24 @@ Kiwi:1111:1.1.11:good:Jun
 Cherry:4:4:good:Oct
 ```
 
-### Example 5: numeric sort with the header
+### Example 5: time sort
+
+This sort via 1st capture of numeric time character according to time.
+
+command line:
+```
+cat fixtures/fruit.txt | aki-resort -e "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)" --according-to time
+```
+
+result output:
+```
+Cherry:4:4:good:Oct
+Apple:33:3.3:good:Mar
+Orange:222:1.1.2:good:Jan
+Kiwi:1111:1.1.11:good:Jun
+```
+
+### Example 6: numeric sort with the header
 
 This sort via 1st chunk of numeric character according to numeric.
 And the 1st line is the fixed header.

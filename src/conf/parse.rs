@@ -18,7 +18,7 @@ const DESCRIPTIONS_TEXT: &str = r#"
 sort lines of text.
 "#;
 const PARAMS_TEXT: &str = r#"Option Parameters:
-  <word>    'string', 'numeric', 'month', 'version'
+  <word>    'month', 'numeric', 'string', 'time', 'version'
   <when>    'always', 'never', or 'auto'
   <exp>     regular expression, sort by the entires match.
   <size>    if a reading size is more than <size>, then it is not output,
@@ -34,6 +34,12 @@ const EXAMPLES_TEXT: &str = r#"Examples:
     cat file1.txt | aki-resort
   This sort via 1st chunk of numeric character according to numeric:
     cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
+  This sort via 1st chunk of numeric character according to month:
+    cat file1.txt | aki-resort -e ":([^:]+)$" --according-to month
+  This sort via 1st chunk of numeric version character according to version:
+    cat file1.txt | aki-resort -e "[^:]+:[^:]+:([0-9.]+):" --according-to version
+  This sort via 1st chunk of numeric time character according to time:
+    cat file1.txt | aki-resort -e "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)" --according-to time
 "#;
 //}}} TEXT
 

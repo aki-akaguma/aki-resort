@@ -1,11 +1,13 @@
 pub mod month;
 pub mod numeric;
 pub mod string;
+pub mod time;
 pub mod version;
 
 pub use month::SortLinesBufferMonth;
 pub use numeric::SortLinesBufferNumeric;
 pub use string::SortLinesBufferString;
+pub use time::SortLinesBufferTime;
 pub use version::SortLinesBufferVersion;
 
 #[derive(Debug)]

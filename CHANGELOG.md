@@ -2,6 +2,12 @@ aki-resort TBD
 ===
 Unreleased changes. Release notes have not yet been written.
 
+0.1.20 (2021-12-18)
+=====
+
+* add according-to time.
+* update depends: anyhow(1.0.51), libc(0.2.112)
+
 0.1.19 (2021-11-15)
 =====
 

@@ -2,7 +2,7 @@ use regex::Regex;
 use std::convert::TryInto;
 
 //{{{ OptMaxBufferSize
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Default, Debug, PartialEq, Clone, Copy)]
 pub struct OptMaxBufferSize(usize);
 impl OptMaxBufferSize {
     pub fn new(v: usize) -> Self {
@@ -14,12 +14,6 @@ impl OptMaxBufferSize {
         } else {
             v <= self.0
         }
-    }
-}
-
-impl Default for OptMaxBufferSize {
-    fn default() -> OptMaxBufferSize {
-        OptMaxBufferSize(0)
     }
 }
 
@@ -51,7 +45,9 @@ impl ::std::str::FromStr for OptMaxBufferSize {
                     "P" | "p" => 1024 * 1024 * 1024 * 1024 * 1024,
                     _ => 1,
                 };
-                if un > usize::MAX.try_into().unwrap() {
+                if un > usize::MAX.try_into().unwrap()
+                    || digit as u64 * un > usize::MAX.try_into().unwrap()
+                {
                     let s = format!("can not parse '{}': overflow", s);
                     return Err(OptMaxBufferSizeParseError::new(s));
                 } else {
@@ -145,6 +141,7 @@ mod tests {
         };
         assert_eq!(col, OptMaxBufferSize::new(123 * 1024 * 1024));
     }
+    #[cfg(target_pointer_width = "64")]
     #[test]
     fn test_from_str_123g() {
         let _col: OptMaxBufferSize = match FromStr::from_str("123g") {
@@ -155,6 +152,19 @@ mod tests {
         };
         #[cfg(target_pointer_width = "64")]
         assert_eq!(_col, OptMaxBufferSize::new(123 * 1024 * 1024 * 1024));
+    }
+    #[cfg(target_pointer_width = "32")]
+    #[test]
+    fn test_from_str_123g() {
+        match FromStr::from_str("123g") {
+            Ok(c) => {
+                let _col: OptMaxBufferSize = c;
+                unreachable!();
+            }
+            Err(err) => {
+                assert_eq!(format!("{}", err), "can not parse \'123g\': overflow");
+            }
+        };
     }
     #[cfg(target_pointer_width = "64")]
     #[test]

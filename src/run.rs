@@ -1,7 +1,8 @@
 use crate::conf::{CmdOptConf, EnvConf};
 use crate::sort::{KeyColumns, KeyLine};
 use crate::sort::{
-    SortLinesBufferMonth, SortLinesBufferNumeric, SortLinesBufferString, SortLinesBufferVersion,
+    SortLinesBufferMonth, SortLinesBufferNumeric, SortLinesBufferString, SortLinesBufferTime,
+    SortLinesBufferVersion,
 };
 use crate::util::err::BrokenPipeError;
 use crate::util::OptAccordingToWord;
@@ -112,16 +113,17 @@ fn run_0(
     let color_is_alyways = crate::my_matches!(conf.opt_color, OptColorWhen::Always);
     let flg_r = conf.flg_reverse;
     let v = match conf.opt_according_to {
-        OptAccordingToWord::String => {
-            lines_loop(sioe, conf, re, SortLinesBufferString::new(flg_r))?
-        }
         OptAccordingToWord::Numeric => {
             lines_loop(sioe, conf, re, SortLinesBufferNumeric::new(flg_r))?
         }
+        OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new(flg_r))?,
+        OptAccordingToWord::String => {
+            lines_loop(sioe, conf, re, SortLinesBufferString::new(flg_r))?
+        }
+        OptAccordingToWord::Time => lines_loop(sioe, conf, re, SortLinesBufferTime::new(flg_r))?,
         OptAccordingToWord::Version => {
             lines_loop(sioe, conf, re, SortLinesBufferVersion::new(flg_r))?
         }
-        OptAccordingToWord::Month => lines_loop(sioe, conf, re, SortLinesBufferMonth::new(flg_r))?,
     };
     //
     #[allow(clippy::collapsible_if)]

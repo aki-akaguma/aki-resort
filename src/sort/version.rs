@@ -116,6 +116,6 @@ mod debug {
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferVersion>(), 16);
-        assert_eq!(std::mem::size_of::<SortLine>(), 72);
+        assert_eq!(std::mem::size_of::<SortLine>(), 64);
     }
 }
