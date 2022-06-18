@@ -11,7 +11,7 @@ macro_rules! my_matches {
 #[cfg(not(has_not_matches))]
 #[macro_export]
 macro_rules! my_matches {
-    ($expression:expr, $( $pattern:pat )|+ $( if $guard: expr )? $(,)?) => {
+    ($expression:expr, $( $pattern:pat_param )|+ $( if $guard: expr )? $(,)?) => {
         matches!($expression, $( $pattern )|+ $( if $guard )?)
     }
 }

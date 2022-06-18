@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "aki-resort"
-version = "0.1.21"
+version = "0.1.22"
 dependencies = [
  "anyhow",
  "atty",
@@ -67,9 +67,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aaa7bd5fb665c6864b5f963dd9097905c54125909c7aa94c9e18507cdbe6c53"
+checksum = "4c02a4d71819009c192cf4872265391563fd6a84c81ff2c0f2a7026ca4c1d85c"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -88,26 +88,26 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.8"
+version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1145cf131a2c6ba0615079ab6a638f7e1973ac9c2634fcbeaaad6114246efe8c"
+checksum = "07db9d94cbd326813772c968ccd25999e5f8ae22f4f8d1b11effa37ef6ce281d"
 dependencies = [
  "autocfg",
  "cfg-if",
  "crossbeam-utils",
- "lazy_static",
  "memoffset",
+ "once_cell",
  "scopeguard",
 ]
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.8"
+version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bf124c720b7686e3c2663cf54062ab0f68a88af2fb6a030e87e30bf721fcb38"
+checksum = "8ff1f980957787286a554052d03c7aee98d99cc32e09f6d45f0a814133c87978"
 dependencies = [
  "cfg-if",
- "lazy_static",
+ "once_cell",
 ]
 
 [[package]]
@@ -118,21 +118,21 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "exec-target"
-version = "0.2.5"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea046e1e8623e407433caba1829fbf458a80ec2c2db03382b87060a1346b0b29"
+checksum = "ee3978de4178433ae49a3095c802e5924d0148db5508ec832ed6ea9014bad6f5"
 
 [[package]]
 name = "flood-tide"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4bdce586a6d6e06911ab966f0e22995a0df330c65659ce835ecf9bfd6b150b6"
+checksum = "e66263a9d863818646c2e2f34f8aa363b52f3f60edcf6e11313930100e232dfe"
 
 [[package]]
 name = "flood-tide-gen"
-version = "0.1.15"
+version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2edf48781ce999b3276320446e16c7dc45eea19b45748de028ce84c441e9b6e"
+checksum = "d13bf036a37d432784dfbbef12e722d6a5080cd3b4548118974909094960e3f3"
 dependencies = [
  "anyhow",
  "case",
@@ -183,18 +183,18 @@ dependencies = [
 
 [[package]]
 name = "memx"
-version = "0.1.20"
+version = "0.1.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d834254fe7334e4bc3a27f93e812987ae7ebd1fd1e96269ac763b5784ec9601f"
+checksum = "7464df217e8198195bceb7ccdff56201b4aa2a0e3e3a4254f2d24b8080b6e978"
 dependencies = [
  "rustc_version",
 ]
 
 [[package]]
 name = "memx-cdy"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3dd389a9c24867660878f12c52b314ecb32f3675d740503feee83a084ca8949"
+checksum = "b5ade3deb40aa5f3b486dc4483e78f27e3aef3444e02c986b14c5af2aa0f37bd"
 dependencies = [
  "libc",
  "memx",
@@ -209,6 +209,12 @@ dependencies = [
  "hermit-abi",
  "libc",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "rayon"
@@ -253,18 +259,18 @@ checksum = "49b3de9ec5dc0a3417da371aab17d729997c15010e7fd24ff707773a33bddb64"
 
 [[package]]
 name = "runnel"
-version = "0.3.10"
+version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a24da42d2f697f3adbb8d428736ead089e337017426ff59acad0e8d20965291c"
+checksum = "fb53b6c382cdf8f6119a69f7f9d39df093f313aea3fd0d6cc28e3039e2e986e3"
 dependencies = [
  "rustc_version",
 ]
 
 [[package]]
 name = "rust-version-info-file"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac55b1eac40f407f50c2db456be5804abc01015a47d0a3a3788818e611a98642"
+checksum = "18443a81274ef6342d6aba23eb82a862cde285d105f5cac289f7fad16f58922b"
 
 [[package]]
 name = "rustc_version"
@@ -283,9 +289,9 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "semver"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cb243bdfdb5936c8dc3c45762a19d12ab4550cdc753bc247637d4ec35a040fd"
+checksum = "a41d061efea015927ac527063765e73601444cdc344ba855bc7bd44578b25e1c"
 
 [[package]]
 name = "winapi"

@@ -1,6 +1,17 @@
-aki-resort TBD
+TBD: aki-resort
 ===
 Unreleased changes. Release notes have not yet been written.
+
+0.1.22 (2022-06-18)
+=====
+
+* changes to edition 2021
+* update depends: flood-tide(0.2.5)
+* update depends: memx(0.1.21), memx-cdy(0.1.8), runnel(0.3.11)
+* update depends: exec-target(v0.2.6), flood-tide-gen(0.1.16)
+* update depends: rust-version-info-file(v0.1.6)
+* update depends: semver(1.0.10)
+* update depends: crossbeam-channel(0.5.5)
 
 0.1.21 (2022-05-22)
 =====
