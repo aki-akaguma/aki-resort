@@ -1,5 +1,5 @@
 //{{{ OptAccordingToWord
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OptAccordingToWord {
     Month,
     Numeric,

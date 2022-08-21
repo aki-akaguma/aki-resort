@@ -1,5 +1,5 @@
 //{{{ OptUcXParam
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OptUcXParam {
     Void,
     Help,

@@ -2,7 +2,7 @@ use regex::Regex;
 use std::convert::TryInto;
 
 //{{{ OptMaxBufferSize
-#[derive(Default, Debug, PartialEq, Clone, Copy)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OptMaxBufferSize(usize);
 impl OptMaxBufferSize {
     pub fn new(v: usize) -> Self {
