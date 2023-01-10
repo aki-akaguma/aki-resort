@@ -154,7 +154,7 @@ fn run_0(
             }
             out_s.push_str(&key_line.line[key_line.key.ed..]);
             #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
+            sioe.pout().lock().write_fmt(format_args!("{out_s}\n"))?;
         }
     } else {
         let mut pre_line = String::new();
@@ -169,7 +169,7 @@ fn run_0(
                 }
                 out_s.push_str(&key_line.line[key_line.key.ed..]);
                 #[rustfmt::skip]
-                sioe.pout().lock().write_fmt(format_args!("{}\n", out_s))?;
+                sioe.pout().lock().write_fmt(format_args!("{out_s}\n"))?;
                 pre_line = key_line.line;
             }
         }

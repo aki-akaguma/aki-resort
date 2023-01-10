@@ -18,7 +18,7 @@ fn main() {
         Err(err) => {
             #[rustfmt::skip]
             let _ = sioe.perr().lock()
-                .write_fmt(format_args!("{}: {:#}\n", program, err));
+                .write_fmt(format_args!("{program}: {err:#}\n"));
             std::process::exit(1);
         }
     };

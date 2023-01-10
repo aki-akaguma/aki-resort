@@ -28,12 +28,12 @@ impl ::std::str::FromStr for OptMaxBufferSize {
                 match mat.as_str().parse::<usize>() {
                     Ok(digit) => digit,
                     Err(err) => {
-                        let s = format!("can not parse '{}': {}", s, err);
+                        let s = format!("can not parse '{s}': {err}");
                         return Err(OptMaxBufferSizeParseError::new(s));
                     }
                 }
             } else {
-                let s = format!("can not parse '{}'", s);
+                let s = format!("can not parse '{s}'");
                 return Err(OptMaxBufferSizeParseError::new(s));
             };
             let unit: usize = if let Some(mat) = caps.get(2) {
@@ -48,7 +48,7 @@ impl ::std::str::FromStr for OptMaxBufferSize {
                 if un > usize::MAX.try_into().unwrap()
                     || digit as u64 * un > usize::MAX.try_into().unwrap()
                 {
-                    let s = format!("can not parse '{}': overflow", s);
+                    let s = format!("can not parse '{s}': overflow");
                     return Err(OptMaxBufferSizeParseError::new(s));
                 } else {
                     un.try_into().unwrap()
@@ -58,7 +58,7 @@ impl ::std::str::FromStr for OptMaxBufferSize {
             };
             Ok(OptMaxBufferSize::new(digit * unit))
         } else {
-            let s = format!("can not parse '{}'", s);
+            let s = format!("can not parse '{s}'");
             Err(OptMaxBufferSizeParseError::new(s))
         }
     }

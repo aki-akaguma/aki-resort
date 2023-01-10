@@ -24,7 +24,7 @@ impl ::std::str::FromStr for OptAccordingToWord {
             "time" => OptAccordingToWord::Time,
             "version" => OptAccordingToWord::Version,
             _ => {
-                let s = format!("can not parse '{}'", s);
+                let s = format!("can not parse '{s}'");
                 return Err(OptAccordingToWordParseError::new(s));
             }
         };
@@ -41,7 +41,7 @@ impl ::std::fmt::Display for OptAccordingToWord {
             OptAccordingToWord::Time => "time",
             OptAccordingToWord::Version => "version",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 //}}} OptAccordingToWord

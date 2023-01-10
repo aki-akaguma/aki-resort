@@ -15,7 +15,7 @@ fn main() {
         #[cfg(not(feature = "debian_build"))]
         let dir = std::env::var("OUT_DIR").unwrap();
         //
-        format!("{}/rust-version-info.txt", dir)
+        format!("{dir}/rust-version-info.txt")
     };
     rust_version_info_file(path.as_str(), "Cargo.toml");
 }

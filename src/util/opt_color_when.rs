@@ -20,7 +20,7 @@ impl ::std::str::FromStr for OptColorWhen {
             "never" => OptColorWhen::Never,
             "auto" => OptColorWhen::Auto,
             _ => {
-                let s = format!("can not parse '{}'", s);
+                let s = format!("can not parse '{s}'");
                 return Err(OptColorWhenParseError::new(s));
             }
         };
@@ -35,7 +35,7 @@ impl ::std::fmt::Display for OptColorWhen {
             OptColorWhen::Never => "never",
             OptColorWhen::Auto => "auto",
         };
-        write!(f, "{}", s)
+        write!(f, "{s}")
     }
 }
 //}}} OptColorWhen
