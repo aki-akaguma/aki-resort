@@ -5,9 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] *
+## [Unreleased]
+
+
+## [0.1.23] (2023-01-11)
 ### Added
 * badges into `README.tpl`
+* rust-version = "1.56.0" into Cargo.toml
 
 ### Changed
 * reformat `CHANGELOG.md`
@@ -20,7 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * clippy: you are deriving `PartialEq` and can implement `Eq`
 * clippy: uninlined_format_args
-
 
 ## [0.1.22] (2022-06-18)
 ### Changed
@@ -185,7 +188,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] (2021-03-01)
 * first commit
 
-[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.22..HEAD
+[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.23..HEAD
+[0.1.23]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.22..v0.1.23
 [0.1.22]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.21..v0.1.22
 [0.1.21]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.20..v0.1.21
 [0.1.20]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.19..v0.1.20
