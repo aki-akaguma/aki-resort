@@ -86,55 +86,50 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
     } else {
         match key_s.rfind(':') {
             Some(idx) => {
-                let num = &key_s[(idx + 1)..]
-                    .parse::<u64>()
-                    .with_context(|| format!("can not parse seconds: '{}'", &key_s[idx..]))?;
+                let num = &key_s[(idx + 1)..].parse::<u64>().with_context(|| {
+                    format!(
+                        "can not parse seconds: '{}', already: {millis}ms",
+                        &key_s[idx..]
+                    )
+                })?;
                 (*num, idx)
             }
             None => (0, key_s.len()),
         }
     };
     let key_s = &key_s[..idx];
-    let (minutes, _idx) = if key_s.is_empty() {
+    let (minutes, idx) = if key_s.is_empty() {
         (0, 0)
     } else {
-        match key_s.rfind(':') {
-            Some(idx) => {
-                let num = &key_s[(idx + 1)..]
-                    .parse::<u64>()
-                    .with_context(|| format!("can not parse minutes: '{}'", &key_s[idx..]))?;
-                (*num, idx)
-            }
-            None => (0, key_s.len()),
-        }
+        let (kk, ii) = match key_s.rfind(':') {
+            Some(idx) => (&key_s[(idx + 1)..], idx),
+            None => (key_s, 0),
+        };
+        let num = kk.parse::<u64>().with_context(|| {
+            format!(
+                "can not parse minutes: '{}', already: {seconds}.{millis}",
+                kk
+            )
+        })?;
+        (num, ii)
     };
     let key_s = &key_s[..idx];
     let (hours, _idx) = if key_s.is_empty() {
         (0, 0)
     } else {
-        let num = key_s
-            .parse::<u64>()
-            .with_context(|| format!("can not parse hours: '{}'", &key_s[idx..]))?;
+        let num = key_s.parse::<u64>().with_context(|| {
+            format!(
+                "can not parse hours: '{}', already: {minutes}:{seconds}.{millis}",
+                key_s
+            )
+        })?;
         (num, key_s.len())
     };
     //
+    //eprintln!("AAA: {hours}:{minutes}:{seconds}.{millis}");
     let dur_sec = Duration::from_secs(hours * 60 * 60 + minutes * 60 + seconds);
     let dur_milli = Duration::from_millis(millis);
     Ok(dur_sec + dur_milli)
-    /*
-    match Version::parse(s) {
-        Ok(ver) => Ok(ver),
-        Err(err) => match err.to_string().as_str() {
-            "unexpected end of input while parsing major version number" => {
-                make_time((s.to_string() + ".0.0").as_str())
-            }
-            "unexpected end of input while parsing minor version number" => {
-                make_time((s.to_string() + ".0").as_str())
-            }
-            _ => Err(err),
-        },
-    }
-    */
 }
 
 impl PartialOrd for SortLine {

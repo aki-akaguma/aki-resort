@@ -1,0 +1,13 @@
+bench-c abyssiniandb 	67.91user 4.58system 1:21.45elapsed 89%CPU (655864maxresident)k
+bench-c berkeleydb_bt 	84.08user 7.09system 2:24.57elapsed 63%CPU (3061200maxresident)k
+bench-c berkeleydb_hs 	86.01user 6.75system 2:08.07elapsed 72%CPU (2219324maxresident)k
+bench-c gdbm 	166.57user 276.04system 19:32.18elapsed 37%CPU (680304maxresident)k
+bench-c kyotocabinet 	743.80user 290.03system 25:45.48elapsed 66%CPU (762084maxresident)k
+bench-c leveldb 	183.32user 132.09system 11:51.47elapsed 44%CPU (86456maxresident)k
+bench-c pickledb 	57.26user 15.36system 2:53.24elapsed 41%CPU (5610668maxresident)k
+bench-c qdbm 	551.57user 145.02system 12:09.98elapsed 95%CPU (30696maxresident)k
+bench-c siamesedb 	153.58user 5.23system 2:46.64elapsed 95%CPU (1003164maxresident)k
+bench-c sled 	762.92user 51.03system 12:48.55elapsed 105%CPU (3209012maxresident)k
+bench-c sqlite 	191.97user 745.43system 2:01:53elapsed 12%CPU (8788maxresident)k
+bench-c tokyocabinet_b 	79.77user 7.38system 2:24.25elapsed 60%CPU (2493500maxresident)k
+bench-c tokyocabinet_h 	82.63user 9.64system 2:47.39elapsed 55%CPU (2493452maxresident)k
