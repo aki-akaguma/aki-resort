@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+## [0.1.24] (2023-01-17)
 ### Fixed
 * bug: can not parse hours: '': invalid digit found in string
-
 
 ## [0.1.23] (2023-01-11)
 ### Added
@@ -190,7 +192,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] (2021-03-01)
 * first commit
 
-[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.23..HEAD
+[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.24..HEAD
+[0.1.24]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.23..v0.1.24
 [0.1.23]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.22..v0.1.23
 [0.1.22]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.21..v0.1.22
 [0.1.21]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.20..v0.1.21
