@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] *
 ### Fixed
 * license files
+* clippy: `redundant_static_lifetimes`, `needless_borrow`, `bool_assert_comparison`
 
 
 ## [0.1.24] (2023-01-17)

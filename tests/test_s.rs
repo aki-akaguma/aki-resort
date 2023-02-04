@@ -93,7 +93,9 @@ macro_rules! do_execute {
     ($args:expr, $sin:expr) => {{
         let sioe = RunnelIoe::new(
             Box::new(StringIn::with_str($sin)),
+            #[allow(clippy::box_default)]
             Box::new(StringOut::default()),
+            #[allow(clippy::box_default)]
             Box::new(StringErr::default()),
         );
         let program = env!("CARGO_PKG_NAME");
@@ -115,7 +117,9 @@ macro_rules! do_execute {
     ($env:expr, $args:expr, $sin:expr) => {{
         let sioe = RunnelIoe::new(
             Box::new(StringIn::with_str($sin)),
+            #[allow(clippy::box_default)]
             Box::new(StringOut::default()),
+            #[allow(clippy::box_default)]
             Box::new(StringErr::default()),
         );
         let program = env!("CARGO_PKG_NAME");
@@ -188,28 +192,28 @@ mod test_s0 {
         let (r, sioe) = do_execute!(&["-H"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), help_msg!());
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     #[test]
     fn test_help_long() {
         let (r, sioe) = do_execute!(&["--help"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), help_msg!());
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     #[test]
     fn test_version() {
         let (r, sioe) = do_execute!(&["-V"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), version_msg!());
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     #[test]
     fn test_version_long() {
         let (r, sioe) = do_execute!(&["--version"]);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), version_msg!());
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     /*
     #[test]
@@ -250,7 +254,7 @@ mod test_s_string {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -266,7 +270,7 @@ mod test_s_string {
                 "Apple:33:3.3:good:Mar\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -282,7 +286,7 @@ mod test_s_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -298,7 +302,7 @@ mod test_s_string {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -319,7 +323,7 @@ mod test_s_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -337,7 +341,7 @@ mod test_s_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -355,7 +359,7 @@ mod test_s_string {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -379,7 +383,7 @@ mod test_s_string_color {
                 "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -396,7 +400,7 @@ mod test_s_string_color {
                 "<S>Apple:33:3.3:good:Mar<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -417,7 +421,7 @@ mod test_s_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -438,7 +442,7 @@ mod test_s_string_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -460,7 +464,7 @@ mod test_s_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -483,7 +487,7 @@ mod test_s_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -506,7 +510,7 @@ mod test_s_string_color {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -527,7 +531,7 @@ mod test_s_numeric {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -541,7 +545,7 @@ mod test_s_numeric {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -560,7 +564,7 @@ mod test_s_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -579,7 +583,7 @@ mod test_s_numeric {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -603,7 +607,7 @@ mod test_s_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -624,7 +628,7 @@ mod test_s_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -645,7 +649,7 @@ mod test_s_numeric {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -671,7 +675,7 @@ mod test_s_numeric_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -690,7 +694,7 @@ mod test_s_numeric_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -718,7 +722,7 @@ mod test_s_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -747,7 +751,7 @@ mod test_s_numeric_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -780,7 +784,7 @@ mod test_s_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -812,7 +816,7 @@ mod test_s_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -844,7 +848,7 @@ mod test_s_numeric_color {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -865,7 +869,7 @@ mod test_s_version {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -879,7 +883,7 @@ mod test_s_version {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -898,7 +902,7 @@ mod test_s_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -923,7 +927,7 @@ mod test_s_version {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -947,7 +951,7 @@ mod test_s_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -975,7 +979,7 @@ mod test_s_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1003,7 +1007,7 @@ mod test_s_version {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1029,7 +1033,7 @@ mod test_s_version_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1048,7 +1052,7 @@ mod test_s_version_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1076,7 +1080,7 @@ mod test_s_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1105,7 +1109,7 @@ mod test_s_version_color {
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1138,7 +1142,7 @@ mod test_s_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1170,7 +1174,7 @@ mod test_s_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1202,7 +1206,7 @@ mod test_s_version_color {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1223,7 +1227,7 @@ mod test_s_month {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1237,7 +1241,7 @@ mod test_s_month {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1256,7 +1260,7 @@ mod test_s_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1275,7 +1279,7 @@ mod test_s_month {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1299,7 +1303,7 @@ mod test_s_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1320,7 +1324,7 @@ mod test_s_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1341,7 +1345,7 @@ mod test_s_month {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1367,7 +1371,7 @@ mod test_s_month_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1386,7 +1390,7 @@ mod test_s_month_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1414,7 +1418,7 @@ mod test_s_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1443,7 +1447,7 @@ mod test_s_month_color {
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1476,7 +1480,7 @@ mod test_s_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1508,7 +1512,7 @@ mod test_s_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1540,7 +1544,7 @@ mod test_s_month_color {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1561,7 +1565,7 @@ mod test_s_time {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1575,7 +1579,7 @@ mod test_s_time {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1599,7 +1603,7 @@ mod test_s_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1624,7 +1628,7 @@ mod test_s_time {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1653,7 +1657,7 @@ mod test_s_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1681,7 +1685,7 @@ mod test_s_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1709,7 +1713,7 @@ mod test_s_time {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1735,7 +1739,7 @@ mod test_s_time_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1754,7 +1758,7 @@ mod test_s_time_color {
             )
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1782,7 +1786,7 @@ mod test_s_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1811,7 +1815,7 @@ mod test_s_time_color {
                 "Cherry:<S>4:4<E>:good:Oct\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1844,7 +1848,7 @@ mod test_s_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1876,7 +1880,7 @@ mod test_s_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1908,7 +1912,7 @@ mod test_s_time_color {
                 "This is footer line. 1\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 
@@ -1926,7 +1930,7 @@ mod test_s_2 {
             concat!(program_name!(), ": over max buffer size: 20\n")
         );
         assert_eq!(buff!(sioe, sout), "");
-        assert_eq!(r.is_ok(), false);
+        assert!(r.is_err());
     }
     //
     #[test]
@@ -1943,7 +1947,7 @@ mod test_s_2 {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
     //
     #[test]
@@ -1961,7 +1965,7 @@ mod test_s_2 {
                 "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
-        assert_eq!(r.is_ok(), true);
+        assert!(r.is_ok());
     }
 }
 /*

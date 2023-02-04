@@ -12,6 +12,9 @@ test:
 clean:
 	cargo clean
 
+clippy:
+	cargo clippy --tests
+
 test-x86_64:
 	cargo test --release --target=x86_64-unknown-linux-musl
 
