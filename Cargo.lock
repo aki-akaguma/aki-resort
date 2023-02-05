@@ -119,27 +119,27 @@ dependencies = [
 
 [[package]]
 name = "either"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
+checksum = "7fcaabb2fef8c910e7f4c7ce9f67a1283a1715879a7c230ca9d6d1ae31f16d91"
 
 [[package]]
 name = "exec-target"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46c8041c9b9d4d3d9557efc899720c285757436a56f7ada805913f28efe4df73"
+checksum = "efe9a9ea99d13f763d9c791a0b8362aeb3400ef0dc30c95470259d37b3b172ca"
 
 [[package]]
 name = "flood-tide"
-version = "0.2.8"
+version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6eef9f93d8cc660233a25f995a445ddfb6f9de6d2439709300013f0006498866"
+checksum = "4aeecba8d23c1840f7db29ec7058ca4b03398deab5baa28b51cc052e413b53c6"
 
 [[package]]
 name = "flood-tide-gen"
-version = "0.1.19"
+version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af95a49ed924cde190334c832451cc3ef5964a6a4a9541511ec7a2592ff20f9a"
+checksum = "c13fb1971380af1647aaa23553932f130381165f2fc1e94f68cfabac607d2b28"
 dependencies = [
  "anyhow",
  "case",
@@ -166,9 +166,9 @@ dependencies = [
 
 [[package]]
 name = "indoc"
-version = "1.0.8"
+version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da2d6f23ffea9d7e76c53eee25dfb67bcd8fde7f1198b0855350698c9f07c780"
+checksum = "bfa799dd5ed20a7e349f3b4639aa80d74549c81716d9ec4f994c9b5815598306"
 
 [[package]]
 name = "lazy_static"
@@ -199,9 +199,9 @@ dependencies = [
 
 [[package]]
 name = "memx"
-version = "0.1.24"
+version = "0.1.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd311ff35c67b06c057084d17ceddf7a42b6e2998fc75fa697485eefc9c63700"
+checksum = "1853a270772ca47bd4a9ebaba82faafd85ed5e8a00df708dfa50f4b3c47ee2fa"
 dependencies = [
  "cpufeatures",
  "rustc_version",
@@ -209,9 +209,9 @@ dependencies = [
 
 [[package]]
 name = "memx-cdy"
-version = "0.1.10"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed3333d4072ffa9c47a43875391ca6133afd4eaf41b14e6542940ae30e95486a"
+checksum = "a0c4d0f4fe52d18d304fd70d6743b90f90606253caa36f9ea7d6dc68953e331f"
 dependencies = [
  "libc",
  "memx",
@@ -239,9 +239,9 @@ dependencies = [
 
 [[package]]
 name = "rayon-core"
-version = "1.10.1"
+version = "1.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cac410af5d00ab6884528b4ab69d1e8e146e8d471201800fa1b4524126de6ad3"
+checksum = "356a0625f1954f730c0201cdab48611198dc6ce21f4acff55089b5a78e6e835b"
 dependencies = [
  "crossbeam-channel",
  "crossbeam-deque",
@@ -268,18 +268,18 @@ checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "runnel"
-version = "0.3.15"
+version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c00482bb828d40e92f4a81fee60d50d4f6af1db5cbecf96ca770eb0b85b187"
+checksum = "e1d2bf495cf67ebda029e8e4af085a99b3c65f728f102024447e5761650fbb03"
 dependencies = [
  "rustc_version",
 ]
 
 [[package]]
 name = "rust-version-info-file"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51082dd22c14a0d99d63127a92d9594ff605b139b2f726a6635e00d562508837"
+checksum = "ee96d34874f941f79fcadfd50cf314ad0c8f0a92c0065cf79df2eaeceb382dc8"
 
 [[package]]
 name = "rustc_version"
