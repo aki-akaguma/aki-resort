@@ -104,12 +104,12 @@ mod tests {
     #[test]
     fn test_display_0() {
         let v = OptMaxBufferSize::new(0);
-        assert_eq!(format!("{}", v), "0");
+        assert_eq!(format!("{v}"), "0");
     }
     #[test]
     fn test_display_1024() {
         let v = OptMaxBufferSize::new(1024);
-        assert_eq!(format!("{}", v), "1024");
+        assert_eq!(format!("{v}"), "1024");
     }
     #[test]
     fn test_from_str_123() {

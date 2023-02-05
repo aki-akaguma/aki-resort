@@ -81,27 +81,27 @@ mod tests {
     #[test]
     fn test_display_numeric() {
         let col = OptAccordingToWord::Numeric;
-        assert_eq!(format!("{}", col), "numeric");
+        assert_eq!(format!("{col}"), "numeric");
     }
     #[test]
     fn test_display_month() {
         let col = OptAccordingToWord::Month;
-        assert_eq!(format!("{}", col), "month");
+        assert_eq!(format!("{col}"), "month");
     }
     #[test]
     fn test_display_string() {
         let col = OptAccordingToWord::String;
-        assert_eq!(format!("{}", col), "string");
+        assert_eq!(format!("{col}"), "string");
     }
     #[test]
     fn test_display_time() {
         let col = OptAccordingToWord::Time;
-        assert_eq!(format!("{}", col), "time");
+        assert_eq!(format!("{col}"), "time");
     }
     #[test]
     fn test_display_version() {
         let col = OptAccordingToWord::Version;
-        assert_eq!(format!("{}", col), "version");
+        assert_eq!(format!("{col}"), "version");
     }
     #[test]
     fn test_from_str_numeric() {

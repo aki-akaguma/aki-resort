@@ -75,17 +75,17 @@ mod tests {
     #[test]
     fn test_display_always() {
         let col = OptColorWhen::Always;
-        assert_eq!(format!("{}", col), "always");
+        assert_eq!(format!("{col}"), "always");
     }
     #[test]
     fn test_display_never() {
         let col = OptColorWhen::Never;
-        assert_eq!(format!("{}", col), "never");
+        assert_eq!(format!("{col}"), "never");
     }
     #[test]
     fn test_display_auto() {
         let col = OptColorWhen::Auto;
-        assert_eq!(format!("{}", col), "auto");
+        assert_eq!(format!("{col}"), "auto");
     }
     #[test]
     fn test_from_str_always() {

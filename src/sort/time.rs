@@ -106,10 +106,7 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
             None => (key_s, 0),
         };
         let num = kk.parse::<u64>().with_context(|| {
-            format!(
-                "can not parse minutes: '{}', already: {seconds}.{millis}",
-                kk
-            )
+            format!("can not parse minutes: '{kk}', already: {seconds}.{millis}")
         })?;
         (num, ii)
     };
@@ -118,10 +115,7 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
         (0, 0)
     } else {
         let num = key_s.parse::<u64>().with_context(|| {
-            format!(
-                "can not parse hours: '{}', already: {minutes}:{seconds}.{millis}",
-                key_s
-            )
+            format!("can not parse hours: '{key_s}', already: {minutes}:{seconds}.{millis}")
         })?;
         (num, key_s.len())
     };
