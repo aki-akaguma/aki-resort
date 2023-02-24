@@ -4,6 +4,7 @@ use std::io::Write;
 
 fn main() {
     // fast mem operation.
+    #[cfg(not(miri))]
     memx_cdy::memx_init();
     //
     let mut env_args: Vec<String> = std::env::args().collect();
