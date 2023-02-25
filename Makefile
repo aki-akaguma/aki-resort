@@ -18,6 +18,7 @@ miri:
 clean:
 	@cargo clean
 	@rm -f z.*
+	@rm -f *.profraw
 
 clippy:
 	cargo clippy --offline --tests --workspace -- -W clippy::uninlined_format_args
@@ -29,7 +30,10 @@ doc:
 	cargo doc
 
 tarpaulin:
-	cargo tarpaulin --offline --engine llvm --out html --output-dir ./target
+	#cargo tarpaulin --offline --engine llvm --out html --output-dir ./target
+	cargo tarpaulin --offline --engine llvm --out lcov --output-dir ./target
+	#cargo tarpaulin --offline --engine ptrace --out lcov --output-dir ./target
+	genhtml -o target/lcov --demangle-cpp target/lcov.info
 
 
 test-x86_64:

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * `.github/workflows/test-windows.yml`
 * test status badges into `README.tpl`
 * miri supports on tests
+* `tarpaulin` supports into `Makefile`
 
 ### Changed
 * refactored `Makefile`
