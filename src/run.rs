@@ -110,7 +110,7 @@ fn run_0(
 ) -> anyhow::Result<()> {
     let color_start_s = env.color_seq_start.as_str();
     let color_end_s = env.color_seq_end.as_str();
-    let color_is_alyways = crate::my_matches!(conf.opt_color, OptColorWhen::Always);
+    let color_is_alyways = matches!(conf.opt_color, OptColorWhen::Always);
     let flg_r = conf.flg_reverse;
     let v = match conf.opt_according_to {
         OptAccordingToWord::Numeric => {
