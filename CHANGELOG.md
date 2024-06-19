@@ -17,10 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * rename: `config` to `config.toml`
 * remove: `cfg(has_not_matches)`
+* rust-version: "1.58.0" to "1.65.0"
 * refactored `Makefile`
-* update depends: flood-tide(0.2.9), flood-tide-gen(0.1.20)
-* update depends: memx-cdy(0.1.11), runnel(0.3.16)
-* update depends: exec-taget(0.2.8), indoc(2.0.0), rust-version-info-file(0.1.8)
+* update depends: flood-tide(0.2.11), flood-tide-gen(0.1.22)
+* update depends: memx-cdy(0.1.13), runnel(0.3.19)
+* update depends: exec-taget(0.2.8), indoc(2.0.0), rust-version-info-file(0.1.10)
 
 ### Removed
 * `COPYING`
