@@ -1,17 +1,12 @@
 //{{{ OptAccordingToWord
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OptAccordingToWord {
     Month,
     Numeric,
+    #[default]
     String,
     Time,
     Version,
-}
-
-impl Default for OptAccordingToWord {
-    fn default() -> OptAccordingToWord {
-        OptAccordingToWord::String
-    }
 }
 
 impl ::std::str::FromStr for OptAccordingToWord {

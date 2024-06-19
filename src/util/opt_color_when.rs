@@ -1,15 +1,10 @@
 //{{{ OptColorWhen
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OptColorWhen {
     Always,
     Never,
+    #[default]
     Auto,
-}
-
-impl Default for OptColorWhen {
-    fn default() -> OptColorWhen {
-        OptColorWhen::Auto
-    }
 }
 
 impl ::std::str::FromStr for OptColorWhen {
