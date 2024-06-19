@@ -74,12 +74,7 @@ fn make_version(s: &str) -> Result<Version, Error> {
 impl PartialOrd for SortLine {
     #[inline]
     fn partial_cmp(&self, other: &SortLine) -> Option<Ordering> {
-        let r = self.key.cmp(&other.key);
-        let r = match r {
-            Ordering::Equal => self.num.cmp(&other.num),
-            _ => r,
-        };
-        Some(r)
+        Some(self.cmp(other))
     }
 }
 

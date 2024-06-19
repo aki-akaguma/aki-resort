@@ -58,14 +58,7 @@ impl SortLine {
 impl PartialOrd for SortLine {
     #[inline]
     fn partial_cmp(&self, other: &SortLine) -> Option<Ordering> {
-        let one = self.key_str();
-        let two = other.key_str();
-        let r = one.cmp(two);
-        let r = match r {
-            Ordering::Equal => self.num.cmp(&other.num),
-            _ => r,
-        };
-        Some(r)
+        Some(self.cmp(other))
     }
 }
 
