@@ -1,6 +1,6 @@
 [package]
 name = "aki-resort"
-version = "0.1.24"
+version = "0.1.25"
 authors = ["aki <aki.akaguma@hotmail.com>"]
 description = """
 sort lines of text. You can use regex to specify the KEY.
