@@ -12,7 +12,7 @@ impl BrokenPipeError for anyhow::Error {
 impl<T> BrokenPipeError for anyhow::Result<T> {
     fn is_broken_pipe(&self) -> bool {
         match self {
-            Err(ref err) => err.is_broken_pipe(),
+            Err(err) => err.is_broken_pipe(),
             _ => false,
         }
     }
