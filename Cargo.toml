@@ -36,7 +36,9 @@ regex = "1.11"
 runnel = "0.4"
 memx-cdy = "0.1"
 semver = "1.0"
-rayon = "1.6"
+
+rayon = "1.10.*"
+rayon-core = "1.12.*"
 
 [dev-dependencies]
 indoc = "2.0"
