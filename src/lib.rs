@@ -4,7 +4,7 @@ sort lines of text. You can use regex to specify the KEY.
 # Features
 
 - sort lines of text. You can use regex to specify the KEY.
-- minimum support rustc 1.58.1 (db9d1b20b 2022-01-20)
+- minimum support rustc 1.65.0 (897e37553 2022-11-02)
 
 # Command help
 

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * updated: regex(1.11)
 * downgraded: rayon = "1.10.*"
 
+### Fixed
+* minimum support version in doc
+
 ## [0.1.25] (2024-06-19)
 ### Added
 * `.github/workflows/test-ubuntu.yml`
