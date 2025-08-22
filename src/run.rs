@@ -142,28 +142,14 @@ fn run_0(
         }
     } else if !conf.flg_unique {
         for key_line in v {
-            let mut out_s: String = String::new();
-            out_s.push_str(&key_line.line[0..key_line.key.st]);
-            if key_line.key.st < key_line.key.ed {
-                out_s.push_str(color_start_s);
-                out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
-                out_s.push_str(color_end_s);
-            }
-            out_s.push_str(&key_line.line[key_line.key.ed..]);
+            let out_s = make_out_s(color_start_s, color_end_s, &key_line)?;
             sioe.pg_out().write_line(out_s)?;
         }
     } else {
         let mut pre_line = String::new();
         for key_line in v {
             if pre_line != key_line.line {
-                let mut out_s: String = String::new();
-                out_s.push_str(&key_line.line[0..key_line.key.st]);
-                if key_line.key.st < key_line.key.ed {
-                    out_s.push_str(color_start_s);
-                    out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
-                    out_s.push_str(color_end_s);
-                }
-                out_s.push_str(&key_line.line[key_line.key.ed..]);
+                let out_s = make_out_s(color_start_s, color_end_s, &key_line)?;
                 sioe.pg_out().write_line(out_s)?;
                 pre_line = key_line.line;
             }
@@ -173,4 +159,20 @@ fn run_0(
     sioe.pg_out().flush_line()?;
     //
     Ok(())
+}
+
+fn make_out_s(
+    color_start_s: &str,
+    color_end_s: &str,
+    key_line: &KeyLine,
+) -> anyhow::Result<String> {
+    let mut out_s: String = String::new();
+    out_s.push_str(&key_line.line[0..key_line.key.st]);
+    if key_line.key.st < key_line.key.ed {
+        out_s.push_str(color_start_s);
+        out_s.push_str(&key_line.line[key_line.key.st..key_line.key.ed]);
+        out_s.push_str(color_end_s);
+    }
+    out_s.push_str(&key_line.line[key_line.key.ed..]);
+    Ok(out_s)
 }

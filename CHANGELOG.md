@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * updated: runnel(0.4.0)
 * updated: rust-version-info-file(0.2)
 * updated: regex(1.11)
-* downgraded: rayon = "1.10.*"
+* downgraded: rayon = "1.10.\*"
+* refactored: `run.rs`
 
 ### Fixed
 * minimum support version in doc
