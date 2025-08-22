@@ -9,7 +9,6 @@ use crate::util::OptAccordingToWord;
 use crate::util::OptColorWhen;
 use regex::Regex;
 use runnel::RunnelIoe;
-use std::io::{BufRead, Write};
 
 pub fn run(sioe: &RunnelIoe, conf: &CmdOptConf, env: &EnvConf) -> anyhow::Result<()> {
     let re = if !conf.opt_exp.is_empty() {
@@ -39,7 +38,7 @@ where
     let mut buf_lines = Vec::new();
     //
     // read all lines
-    for line in sioe.pin().lock().lines() {
+    for line in sioe.pg_in().lines() {
         let mut line_s = line?;
         line_s.shrink_to_fit();
         let line_ss = line_s.as_str();
@@ -130,15 +129,13 @@ fn run_0(
     if !color_is_alyways {
         if !conf.flg_unique {
             for key_line in v {
-                #[rustfmt::skip]
-                sioe.pout().lock().write_fmt(format_args!("{}\n", key_line.line))?;
+                sioe.pg_out().write_line(key_line.line)?;
             }
         } else {
             let mut pre_line = String::new();
             for key_line in v {
                 if pre_line != key_line.line {
-                    #[rustfmt::skip]
-                    sioe.pout().lock().write_fmt(format_args!("{}\n", key_line.line))?;
+                    sioe.pg_out().write_line(key_line.line.clone())?;
                     pre_line = key_line.line;
                 }
             }
@@ -153,8 +150,7 @@ fn run_0(
                 out_s.push_str(color_end_s);
             }
             out_s.push_str(&key_line.line[key_line.key.ed..]);
-            #[rustfmt::skip]
-            sioe.pout().lock().write_fmt(format_args!("{out_s}\n"))?;
+            sioe.pg_out().write_line(out_s)?;
         }
     } else {
         let mut pre_line = String::new();
@@ -168,14 +164,13 @@ fn run_0(
                     out_s.push_str(color_end_s);
                 }
                 out_s.push_str(&key_line.line[key_line.key.ed..]);
-                #[rustfmt::skip]
-                sioe.pout().lock().write_fmt(format_args!("{out_s}\n"))?;
+                sioe.pg_out().write_line(out_s)?;
                 pre_line = key_line.line;
             }
         }
     }
     //
-    sioe.pout().lock().flush()?;
+    sioe.pg_out().flush_line()?;
     //
     Ok(())
 }

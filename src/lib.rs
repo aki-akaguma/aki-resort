@@ -268,7 +268,7 @@ pub fn execute_env(
         Err(errs) => {
             for err in errs.iter().take(1) {
                 if err.is_help() || err.is_version() {
-                    let _r = sioe.pout().lock().write_fmt(format_args!("{err}\n"));
+                    let _r = sioe.pg_out().lock().write_fmt(format_args!("{err}\n"));
                     return Ok(());
                 }
             }
