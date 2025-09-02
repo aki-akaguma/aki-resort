@@ -213,7 +213,6 @@ mod util;
 
 use flood_tide::HelpVersion;
 use runnel::RunnelIoe;
-use std::io::Write;
 
 const TRY_HELP_MSG: &str = "Try --help for help.";
 
@@ -238,7 +237,7 @@ const TRY_HELP_MSG: &str = "Try --help for help.";
 /// use runnel::RunnelIoeBuilder;
 ///
 /// let r = libaki_resort::execute(&RunnelIoeBuilder::new().build(),
-///     "resort", &[]);
+///     "resort", &[] as &[&str]);
 /// ```
 ///
 /// ## Example 2: numeric sort
@@ -249,31 +248,43 @@ const TRY_HELP_MSG: &str = "Try --help for help.";
 /// use runnel::RunnelIoeBuilder;
 ///
 /// let r = libaki_resort::execute(&RunnelIoeBuilder::new().build(),
-///     "resort", &["-e", r"[0-9]+", "--according-to", "numeric"]);
+///     "resort", ["-e", r"[0-9]+", "--according-to", "numeric"]);
 /// ```
 ///
-pub fn execute(sioe: &RunnelIoe, prog_name: &str, args: &[&str]) -> anyhow::Result<()> {
+pub fn execute<I, S>(sioe: &RunnelIoe, prog_name: &str, args: I) -> anyhow::Result<()>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<std::ffi::OsStr>,
+{
     let env = conf::EnvConf::new();
     execute_env(sioe, prog_name, args, &env)
 }
 
-pub fn execute_env(
+pub fn execute_env<I, S>(
     sioe: &RunnelIoe,
     prog_name: &str,
-    args: &[&str],
+    args: I,
     env: &conf::EnvConf,
-) -> anyhow::Result<()> {
-    let conf = match conf::parse_cmdopts(prog_name, args) {
-        Ok(conf) => conf,
+) -> anyhow::Result<()>
+where
+    I: IntoIterator<Item = S>,
+    S: AsRef<std::ffi::OsStr>,
+{
+    let args: Vec<String> = args
+        .into_iter()
+        .map(|s| s.as_ref().to_string_lossy().into_owned())
+        .collect();
+    let args_str: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    //
+    match conf::parse_cmdopts(prog_name, &args_str) {
+        Ok(conf) => run::run(sioe, &conf, env),
         Err(errs) => {
-            for err in errs.iter().take(1) {
-                if err.is_help() || err.is_version() {
-                    let _r = sioe.pg_out().lock().write_fmt(format_args!("{err}\n"));
-                    return Ok(());
-                }
+            if let Some(err) = errs.iter().find(|e| e.is_help() || e.is_version()) {
+                sioe.pg_out().write_line(err.to_string())?;
+                Ok(())
+            } else {
+                Err(anyhow!("{errs}\n{TRY_HELP_MSG}"))
             }
-            return Err(anyhow!("{}\n{}", errs, TRY_HELP_MSG));
         }
-    };
-    run::run(sioe, &conf, env)
+    }
 }

@@ -243,7 +243,7 @@ mod test_s_string {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&[], super::IN_DAT_FRUIT,);
+        let (r, sioe) = do_execute!(&[] as &[&str], super::IN_DAT_FRUIT,);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
