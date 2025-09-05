@@ -1,87 +1,5 @@
-macro_rules! help_msg {
-    () => {
-        concat!(
-            version_msg!(),
-            "\n",
-            indoc::indoc!(
-                r#"
-            Usage:
-              aki-resort [options]
-
-            sort lines of text.
-
-            Ordering options:
-              -r, --reverse                 reverse the result of comparisons
-                  --according-to <word>     sort according to <word>
-              -h, --head <num>              unsort the first <num> lines.
-              -t, --tail <num>              unsort the last <num> lines.
-
-            Other options:
-                  --color <when>            use markers to highlight the matching strings
-              -e, --exp <exp>               regular expression. sort by the entires match
-              -u, --unique                  output only the first line of an equal
-                  --max-buffer <size>       max buffer size
-
-              -H, --help        display this help and exit
-              -V, --version     display version information and exit
-              -X <x-options>    x options. try -X help
-
-            Option Parameters:
-              <word>    'month', 'numeric', 'string', 'time', 'version'
-              <when>    'always', 'never', or 'auto'
-              <exp>     regular expression, sort by the entires match.
-              <size>    if a reading size is more than <size>, then it is not output,
-                        quit and display error message.
-
-            Environments:
-              AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi
-              AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi
-
-            Examples:
-              This sort via utf-8 code:
-                cat file1.txt | aki-resort
-              This sort via 1st chunk of numeric character according to numeric:
-                cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
-              This sort via 1st chunk of numeric character according to month:
-                cat file1.txt | aki-resort -e ":([^:]+)$" --according-to month
-              This sort via 1st chunk of numeric version character according to version:
-                cat file1.txt | aki-resort -e "[^:]+:[^:]+:([0-9.]+):" --according-to version
-              This sort via 1st chunk of numeric time character according to time:
-                cat file1.txt | aki-resort -e "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)" --according-to time
-            "#
-            ),
-            "\n",
-        )
-    };
-}
-
-/*
-macro_rules! try_help_msg {
-    () => {
-        "Try --help for help.\n"
-    };
-}
-*/
-
-macro_rules! program_name {
-    () => {
-        "aki-resort"
-    };
-}
-
-macro_rules! version_msg {
-    () => {
-        concat!(program_name!(), " ", env!("CARGO_PKG_VERSION"), "\n")
-    };
-}
-
-/*
-macro_rules! fixture_text10k {
-    () => {
-        "fixtures/text10k.txt"
-    };
-}
-*/
+#[macro_use]
+mod helper;
 
 macro_rules! do_execute {
     ($args:expr) => {
@@ -146,19 +64,6 @@ macro_rules! buff {
     };
 }
 
-//
-macro_rules! color_start {
-    //() => { "\u{1B}[01;31m" }
-    () => {
-        "<S>"
-    };
-}
-macro_rules! color_end {
-    //() => {"\u{1B}[0m"}
-    () => {
-        "<E>"
-    };
-}
 macro_rules! env_1 {
     () => {{
         let mut env = conf::EnvConf::new();
@@ -168,20 +73,7 @@ macro_rules! env_1 {
     }};
 }
 
-const IN_DAT_FRUIT_HEADER: &str = "\
-name:number:version:nice:month
-";
-const IN_DAT_FRUIT_FOOTER: &str = "\
-This is footer line. 1
-";
-const IN_DAT_FRUIT: &str = "\
-Apple:33:3.3:good:Mar
-Orange:222:1.1.2:good:Jan
-Cherry:4:4:good:Oct
-Kiwi:1111:1.1.11:good:Jun
-";
-
-mod test_s0 {
+mod test_0_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -215,6 +107,21 @@ mod test_s0 {
         assert_eq!(buff!(sioe, sout), version_msg!());
         assert!(r.is_ok());
     }
+    #[test]
+    fn test_invalid_opt() {
+        let (r, sioe) = do_execute!(["-z"]);
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(
+                program_name!(),
+                ": ",
+                "Invalid option: z\n",
+                try_help_msg!()
+            )
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
     /*
     #[test]
     fn test_non_option() {
@@ -235,7 +142,48 @@ mod test_s0 {
     */
 }
 
-mod test_s_string {
+mod test_0_x_options_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::*;
+    use runnel::*;
+    //
+    #[test]
+    fn test_x_rust_version_info() {
+        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(!buff!(sioe, sout).is_empty());
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_x_option_help() {
+        let (r, sioe) = do_execute!(["-X", "help"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(buff!(sioe, sout).contains("Options:"));
+        assert!(buff!(sioe, sout).contains("-X rust-version-info"));
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_x_option_rust_version_info() {
+        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_multiple_x_options() {
+        let (r, sioe) = do_execute!(["-X", "help", "-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        // The first one should be executed and the program should exit.
+        assert!(buff!(sioe, sout).contains("Options:"));
+        assert!(!buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
+    }
+}
+
+mod test_1_string_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -243,7 +191,8 @@ mod test_s_string {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&[] as &[&str], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&[] as &[&str], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -259,7 +208,8 @@ mod test_s_string {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-r"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -275,7 +225,8 @@ mod test_s_string {
     //
     #[test]
     fn test_t3() {
-        let (r, sioe) = do_execute!(&["-e", "[0-9]+"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -291,7 +242,8 @@ mod test_s_string {
     //
     #[test]
     fn test_t4() {
-        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-r"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -307,8 +259,9 @@ mod test_s_string {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
-        let (r, sioe) = do_execute!(&["-e", "[0-9]+"], in_w.as_str(),);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -328,8 +281,8 @@ mod test_s_string {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
-        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-h", "1"], in_w.as_str(),);
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-h", "1"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -346,7 +299,7 @@ mod test_s_string {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(&["-e", "[0-9]+", "-t", "1"], in_w.as_str(),);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -363,7 +316,7 @@ mod test_s_string {
     }
 }
 
-mod test_s_string_color {
+mod test_1_string_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -372,7 +325,8 @@ mod test_s_string_color {
     #[test]
     fn test_t1() {
         let env = env_1!();
-        let (r, sioe) = do_execute!(&env, &["--color", "always"], super::IN_DAT_FRUIT);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&env, &["--color", "always"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -389,7 +343,8 @@ mod test_s_string_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
-        let (r, sioe) = do_execute!(&env, &["-r", "--color", "always"], super::IN_DAT_FRUIT);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&env, &["-r", "--color", "always"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -406,11 +361,8 @@ mod test_s_string_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
-        let (r, sioe) = do_execute!(
-            &env,
-            &["-e", "[0-9]+", "--color", "always"],
-            super::IN_DAT_FRUIT
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&env, &["-e", "[0-9]+", "--color", "always"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -427,11 +379,8 @@ mod test_s_string_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
-        let (r, sioe) = do_execute!(
-            &env,
-            &["-e", "[0-9]+", "-r", "--color", "always"],
-            super::IN_DAT_FRUIT
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&env, &["-e", "[0-9]+", "-r", "--color", "always"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -448,7 +397,8 @@ mod test_s_string_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(&env, &["-e", "[0-9]+", "--color", "always"], in_w.as_str());
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -470,11 +420,11 @@ mod test_s_string_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["-e", "[0-9]+", "-h", "1", "--color", "always"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -493,11 +443,11 @@ mod test_s_string_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["-e", "[0-9]+", "-t", "1", "--color", "always"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -514,7 +464,7 @@ mod test_s_string_color {
     }
 }
 
-mod test_s_numeric {
+mod test_1_numeric_2 {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -522,7 +472,8 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&["--according-to", "numeric"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "numeric"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -536,7 +487,8 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["--according-to", "numeric", "-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "numeric", "-r"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -550,10 +502,8 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t3() {
-        let (r, sioe) = do_execute!(
-            &["-e", "[0-9]+", "--according-to", "numeric"],
-            super::IN_DAT_FRUIT,
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "--according-to", "numeric"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -569,10 +519,8 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t4() {
-        let (r, sioe) = do_execute!(
-            &["-e", "[0-9]+", "--according-to", "numeric", "-r"],
-            super::IN_DAT_FRUIT,
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "--according-to", "numeric", "-r"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -588,11 +536,9 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
-        let (r, sioe) = do_execute!(
-            &["-e", "[0-9]+", "--according-to", "numeric"],
-            in_w.as_str(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(&["-e", "[0-9]+", "--according-to", "numeric"], &in_w,);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -612,10 +558,10 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &["-e", "[0-9]+", "--according-to", "numeric", "-h", "1"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -633,10 +579,10 @@ mod test_s_numeric {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &["-e", "[0-9]+", "--according-to", "numeric", "-t", "1"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -653,7 +599,7 @@ mod test_s_numeric {
     }
 }
 
-mod test_s_numeric_color {
+mod test_1_numeric_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -662,10 +608,11 @@ mod test_s_numeric_color {
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "numeric", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -681,10 +628,11 @@ mod test_s_numeric_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "numeric", "-r", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -700,6 +648,7 @@ mod test_s_numeric_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -710,7 +659,7 @@ mod test_s_numeric_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -728,6 +677,7 @@ mod test_s_numeric_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -739,7 +689,7 @@ mod test_s_numeric_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -757,7 +707,8 @@ mod test_s_numeric_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -768,7 +719,7 @@ mod test_s_numeric_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -790,7 +741,7 @@ mod test_s_numeric_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -803,7 +754,7 @@ mod test_s_numeric_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -822,7 +773,7 @@ mod test_s_numeric_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -835,7 +786,7 @@ mod test_s_numeric_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -852,7 +803,7 @@ mod test_s_numeric_color {
     }
 }
 
-mod test_s_version {
+mod test_1_version_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -860,7 +811,8 @@ mod test_s_version {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&["--according-to", "version"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "version"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -874,7 +826,8 @@ mod test_s_version {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["--according-to", "version", "-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "version", "-r"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -888,9 +841,10 @@ mod test_s_version {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -907,6 +861,7 @@ mod test_s_version {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -915,7 +870,7 @@ mod test_s_version {
                 "version",
                 "-r",
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -932,10 +887,11 @@ mod test_s_version {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -956,7 +912,7 @@ mod test_s_version {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -966,7 +922,7 @@ mod test_s_version {
                 "-h",
                 "1"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -984,7 +940,7 @@ mod test_s_version {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -994,7 +950,7 @@ mod test_s_version {
                 "-t",
                 "1"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1011,7 +967,7 @@ mod test_s_version {
     }
 }
 
-mod test_s_version_color {
+mod test_1_version_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1020,10 +976,11 @@ mod test_s_version_color {
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "version", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1039,10 +996,11 @@ mod test_s_version_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "version", "-r", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1058,6 +1016,7 @@ mod test_s_version_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1068,7 +1027,7 @@ mod test_s_version_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1086,6 +1045,7 @@ mod test_s_version_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1097,7 +1057,7 @@ mod test_s_version_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1115,7 +1075,8 @@ mod test_s_version_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1126,7 +1087,7 @@ mod test_s_version_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1148,7 +1109,7 @@ mod test_s_version_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1161,7 +1122,7 @@ mod test_s_version_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1180,7 +1141,7 @@ mod test_s_version_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1193,7 +1154,7 @@ mod test_s_version_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1210,7 +1171,7 @@ mod test_s_version_color {
     }
 }
 
-mod test_s_month {
+mod test_1_month_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1218,7 +1179,8 @@ mod test_s_month {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&["--according-to", "month"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "month"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -1232,7 +1194,8 @@ mod test_s_month {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["--according-to", "month", "-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "month", "-r"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -1246,10 +1209,8 @@ mod test_s_month {
     //
     #[test]
     fn test_t3() {
-        let (r, sioe) = do_execute!(
-            &["-e", ":([^:]+)$", "--according-to", "month"],
-            super::IN_DAT_FRUIT,
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", ":([^:]+)$", "--according-to", "month"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -1265,10 +1226,8 @@ mod test_s_month {
     //
     #[test]
     fn test_t4() {
-        let (r, sioe) = do_execute!(
-            &["-e", ":([^:]+)$", "--according-to", "month", "-r"],
-            super::IN_DAT_FRUIT,
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["-e", ":([^:]+)$", "--according-to", "month", "-r"], &in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
             buff!(sioe, sout),
@@ -1284,7 +1243,8 @@ mod test_s_month {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &["-e", ":([^:]+)$", "--according-to", "month"],
             in_w.as_str(),
@@ -1308,10 +1268,10 @@ mod test_s_month {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &["-e", ":([^:]+)$", "--according-to", "month", "-h", "1"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1329,10 +1289,10 @@ mod test_s_month {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &["-e", ":([^:]+)$", "--according-to", "month", "-t", "1"],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1349,7 +1309,7 @@ mod test_s_month {
     }
 }
 
-mod test_s_month_color {
+mod test_1_month_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1358,10 +1318,11 @@ mod test_s_month_color {
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "month", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1377,10 +1338,11 @@ mod test_s_month_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "month", "-r", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1396,6 +1358,7 @@ mod test_s_month_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1406,7 +1369,7 @@ mod test_s_month_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1424,6 +1387,7 @@ mod test_s_month_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1435,7 +1399,7 @@ mod test_s_month_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1453,7 +1417,8 @@ mod test_s_month_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1464,7 +1429,7 @@ mod test_s_month_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1486,7 +1451,7 @@ mod test_s_month_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1499,7 +1464,7 @@ mod test_s_month_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1518,7 +1483,7 @@ mod test_s_month_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1531,7 +1496,7 @@ mod test_s_month_color {
                 "--color",
                 "always"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1548,7 +1513,7 @@ mod test_s_month_color {
     }
 }
 
-mod test_s_time {
+mod test_1_time_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1556,7 +1521,8 @@ mod test_s_time {
     //
     #[test]
     fn test_t1() {
-        let (r, sioe) = do_execute!(&["--according-to", "time"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "time"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -1570,7 +1536,8 @@ mod test_s_time {
     //
     #[test]
     fn test_t2() {
-        let (r, sioe) = do_execute!(&["--according-to", "time", "-r"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--according-to", "time", "-r"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(
@@ -1584,6 +1551,7 @@ mod test_s_time {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -1591,7 +1559,7 @@ mod test_s_time {
                 "--according-to",
                 "time"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1608,6 +1576,7 @@ mod test_s_time {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -1616,7 +1585,7 @@ mod test_s_time {
                 "time",
                 "-r",
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1633,7 +1602,8 @@ mod test_s_time {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -1641,7 +1611,7 @@ mod test_s_time {
                 "--according-to",
                 "time"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1662,7 +1632,7 @@ mod test_s_time {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -1672,7 +1642,7 @@ mod test_s_time {
                 "-h",
                 "1"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1690,7 +1660,7 @@ mod test_s_time {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &[
                 "-e",
@@ -1700,7 +1670,7 @@ mod test_s_time {
                 "-t",
                 "1"
             ],
-            in_w.as_str(),
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1715,9 +1685,43 @@ mod test_s_time {
         );
         assert!(r.is_ok());
     }
+    //
+    #[test]
+    fn test_t7() {
+        let in_w = std::fs::read_to_string(fixture_time!()).unwrap();
+        let (r, sioe) = do_execute!(
+            &[
+                "-e",
+                "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
+                "--according-to",
+                "time",
+            ],
+            &in_w,
+        );
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(
+            buff!(sioe, sout),
+            concat!(
+                "bench-c abyssiniandb \t67.91user 4.58system 1:21.45elapsed 89%CPU (655864maxresident)k\n",
+                "bench-c berkeleydb_hs \t86.01user 6.75system 2:08.07elapsed 72%CPU (2219324maxresident)k\n",
+                "bench-c tokyocabinet_b \t79.77user 7.38system 2:24.25elapsed 60%CPU (2493500maxresident)k\n",
+                "bench-c berkeleydb_bt \t84.08user 7.09system 2:24.57elapsed 63%CPU (3061200maxresident)k\n",
+                "bench-c siamesedb \t153.58user 5.23system 2:46.64elapsed 95%CPU (1003164maxresident)k\n",
+                "bench-c tokyocabinet_h \t82.63user 9.64system 2:47.39elapsed 55%CPU (2493452maxresident)k\n",
+                "bench-c pickledb \t57.26user 15.36system 2:53.24elapsed 41%CPU (5610668maxresident)k\n",
+                "bench-c leveldb \t183.32user 132.09system 11:51.47elapsed 44%CPU (86456maxresident)k\n",
+                "bench-c qdbm \t551.57user 145.02system 12:09.98elapsed 95%CPU (30696maxresident)k\n",
+                "bench-c sled \t762.92user 51.03system 12:48.55elapsed 105%CPU (3209012maxresident)k\n",
+                "bench-c gdbm \t166.57user 276.04system 19:32.18elapsed 37%CPU (680304maxresident)k\n",
+                "bench-c kyotocabinet \t743.80user 290.03system 25:45.48elapsed 66%CPU (762084maxresident)k\n",
+                "bench-c sqlite \t191.97user 745.43system 2:01:53elapsed 12%CPU (8788maxresident)k\n"
+            )
+        );
+        assert!(r.is_ok());
+    }
 }
 
-mod test_s_time_color {
+mod test_1_time_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1726,10 +1730,11 @@ mod test_s_time_color {
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "time", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1745,10 +1750,11 @@ mod test_s_time_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &["--according-to", "time", "-r", "--color", "always"],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(
             buff!(sioe, serr),
@@ -1764,6 +1770,7 @@ mod test_s_time_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1774,7 +1781,7 @@ mod test_s_time_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1792,6 +1799,7 @@ mod test_s_time_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1803,7 +1811,7 @@ mod test_s_time_color {
                 "--color",
                 "always"
             ],
-            super::IN_DAT_FRUIT,
+            &in_w,
         );
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1821,7 +1829,8 @@ mod test_s_time_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1854,7 +1863,7 @@ mod test_s_time_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1886,7 +1895,7 @@ mod test_s_time_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let (r, sioe) = do_execute!(
             &env,
             &[
@@ -1916,7 +1925,7 @@ mod test_s_time_color {
     }
 }
 
-mod test_s_2 {
+mod test_2_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1924,7 +1933,8 @@ mod test_s_2 {
     //
     #[test]
     fn test_max_buffer() {
-        let (r, sioe) = do_execute!(&["--max-buffer", "20"], super::IN_DAT_FRUIT,);
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let (r, sioe) = do_execute!(&["--max-buffer", "20"], &in_w);
         assert_eq!(
             buff!(sioe, serr),
             concat!(program_name!(), ": over max buffer size: 20\n")
@@ -1935,7 +1945,8 @@ mod test_s_2 {
     //
     #[test]
     fn test_uniq() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(&["-u"], in_w.as_str(),);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1953,7 +1964,8 @@ mod test_s_2 {
     #[test]
     fn test_uniq_color() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.to_string() + &in_w;
         let (r, sioe) = do_execute!(&env, &["-u", "--color", "always"], in_w.as_str(),);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
@@ -1969,7 +1981,7 @@ mod test_s_2 {
     }
 }
 /*
-mod test_s3 {
+mod test_3_s {
     use libaki_resort::*;
     use runnel::RunnelIoe;
     use runnel::medium::stringio::{StringIn, StringOut, StringErr};
@@ -1982,7 +1994,7 @@ mod test_s3 {
 }
 */
 /*
-mod test_s4 {
+mod test_4_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;

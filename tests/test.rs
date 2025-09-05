@@ -1,103 +1,8 @@
 const TARGET_EXE_PATH: &str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
 
-macro_rules! help_msg {
-    () => {
-        concat!(
-            version_msg!(),
-            "\n",
-            indoc::indoc!(
-                r#"
-            Usage:
-              aki-resort [options]
+#[macro_use]
+mod helper;
 
-            sort lines of text.
-
-            Ordering options:
-              -r, --reverse                 reverse the result of comparisons
-                  --according-to <word>     sort according to <word>
-              -h, --head <num>              unsort the first <num> lines.
-              -t, --tail <num>              unsort the last <num> lines.
-
-            Other options:
-                  --color <when>            use markers to highlight the matching strings
-              -e, --exp <exp>               regular expression. sort by the entires match
-              -u, --unique                  output only the first line of an equal
-                  --max-buffer <size>       max buffer size
-
-              -H, --help        display this help and exit
-              -V, --version     display version information and exit
-              -X <x-options>    x options. try -X help
-
-            Option Parameters:
-              <word>    'month', 'numeric', 'string', 'time', 'version'
-              <when>    'always', 'never', or 'auto'
-              <exp>     regular expression, sort by the entires match.
-              <size>    if a reading size is more than <size>, then it is not output,
-                        quit and display error message.
-
-            Environments:
-              AKI_RESORT_COLOR_SEQ_ST   color start sequence specified by ansi
-              AKI_RESORT_COLOR_SEQ_ED   color end sequence specified by ansi
-
-            Examples:
-              This sort via utf-8 code:
-                cat file1.txt | aki-resort
-              This sort via 1st chunk of numeric character according to numeric:
-                cat file1.txt | aki-resort -e "[0-9]+" --according-to numeric
-              This sort via 1st chunk of numeric character according to month:
-                cat file1.txt | aki-resort -e ":([^:]+)$" --according-to month
-              This sort via 1st chunk of numeric version character according to version:
-                cat file1.txt | aki-resort -e "[^:]+:[^:]+:([0-9.]+):" --according-to version
-              This sort via 1st chunk of numeric time character according to time:
-                cat file1.txt | aki-resort -e "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)" --according-to time
-            "#
-            ),
-            "\n",
-        )
-    };
-}
-
-/*
-macro_rules! try_help_msg {
-    () => {
-        "Try --help for help.\n"
-    };
-}
-*/
-
-macro_rules! program_name {
-    () => {
-        "aki-resort"
-    };
-}
-
-macro_rules! version_msg {
-    () => {
-        concat!(program_name!(), " ", env!("CARGO_PKG_VERSION"), "\n")
-    };
-}
-
-/*
-macro_rules! fixture_text10k {
-    () => {
-        "fixtures/text10k.txt"
-    };
-}
-*/
-
-//
-macro_rules! color_start {
-    //() => { "\u{1B}[01;31m" }
-    () => {
-        "<S>"
-    };
-}
-macro_rules! color_end {
-    //() => {"\u{1B}[0m"}
-    () => {
-        "<E>"
-    };
-}
 macro_rules! env_1 {
     () => {{
         let mut env = std::collections::HashMap::new();
@@ -112,34 +17,6 @@ macro_rules! env_1 {
         env
     }};
 }
-
-const IN_DAT_FRUIT_HEADER: &str = "\
-name:number:version:nice:month
-";
-const IN_DAT_FRUIT_FOOTER: &str = "\
-This is footer line. 1
-";
-const IN_DAT_FRUIT: &str = "\
-Apple:33:3.3:good:Mar
-Orange:222:1.1.2:good:Jan
-Cherry:4:4:good:Oct
-Kiwi:1111:1.1.11:good:Jun
-";
-const IN_DAT_TIME: &str = "\
-bench-c abyssiniandb 	67.91user 4.58system 1:21.45elapsed 89%CPU (655864maxresident)k
-bench-c berkeleydb_bt 	84.08user 7.09system 2:24.57elapsed 63%CPU (3061200maxresident)k
-bench-c berkeleydb_hs 	86.01user 6.75system 2:08.07elapsed 72%CPU (2219324maxresident)k
-bench-c gdbm 	166.57user 276.04system 19:32.18elapsed 37%CPU (680304maxresident)k
-bench-c kyotocabinet 	743.80user 290.03system 25:45.48elapsed 66%CPU (762084maxresident)k
-bench-c leveldb 	183.32user 132.09system 11:51.47elapsed 44%CPU (86456maxresident)k
-bench-c pickledb 	57.26user 15.36system 2:53.24elapsed 41%CPU (5610668maxresident)k
-bench-c qdbm 	551.57user 145.02system 12:09.98elapsed 95%CPU (30696maxresident)k
-bench-c siamesedb 	153.58user 5.23system 2:46.64elapsed 95%CPU (1003164maxresident)k
-bench-c sled 	762.92user 51.03system 12:48.55elapsed 105%CPU (3209012maxresident)k
-bench-c sqlite 	191.97user 745.43system 2:01:53elapsed 12%CPU (8788maxresident)k
-bench-c tokyocabinet_b 	79.77user 7.38system 2:24.25elapsed 60%CPU (2493500maxresident)k
-bench-c tokyocabinet_h 	82.63user 9.64system 2:47.39elapsed 55%CPU (2493452maxresident)k
-";
 
 mod test_0 {
     use exec_target::exec_target;
@@ -173,6 +50,21 @@ mod test_0 {
         assert_eq!(oup.stdout, version_msg!());
         assert!(oup.status.success());
     }
+    #[test]
+    fn test_invalid_opt() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-z"]);
+        assert_eq!(
+            oup.stderr,
+            concat!(
+                program_name!(),
+                ": ",
+                "Invalid option: z\n",
+                try_help_msg!()
+            )
+        );
+        assert_eq!(oup.stdout, "");
+        assert!(!oup.status.success());
+    }
     /*
     #[test]
     fn test_non_option() {
@@ -193,17 +85,46 @@ mod test_0 {
     */
 }
 
-mod test_string {
+mod test_0_x_options {
+    use exec_target::exec_target;
+    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+    //
+    #[test]
+    fn test_x_option_help() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help"]);
+        assert_eq!(oup.stderr, "");
+        assert!(oup.stdout.contains("Options:"));
+        assert!(oup.stdout.contains("-X rust-version-info"));
+        assert!(oup.status.success());
+    }
+    //
+    #[test]
+    fn test_x_option_rust_version_info() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "rust-version-info"]);
+        assert_eq!(oup.stderr, "");
+        assert!(oup.stdout.contains("rustc"));
+        assert!(oup.status.success());
+    }
+    //
+    #[test]
+    fn test_multiple_x_options() {
+        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help", "-X", "rust-version-info"]);
+        assert_eq!(oup.stderr, "");
+        // The first one should be executed and the program should exit.
+        assert!(oup.stdout.contains("Options:"));
+        assert!(!oup.stdout.contains("rustc"));
+        assert!(oup.status.success());
+    }
+}
+
+mod test_1_string {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            &[] as &[&str],
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, &[] as &[&str], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -219,7 +140,8 @@ mod test_string {
     //
     #[test]
     fn test_t2() {
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r"], super::IN_DAT_FRUIT.as_bytes());
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -235,11 +157,8 @@ mod test_string {
     //
     #[test]
     fn test_t3() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+"],
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -255,11 +174,8 @@ mod test_string {
     //
     #[test]
     fn test_t4() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+", "-r"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -275,7 +191,8 @@ mod test_string {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -296,7 +213,7 @@ mod test_string {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "-h", "1"],
@@ -318,7 +235,7 @@ mod test_string {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "-t", "1"],
@@ -339,19 +256,16 @@ mod test_string {
     }
 }
 
-mod test_string_color {
+mod test_1_string_color {
     use exec_target::exec_target_with_env_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
         let env = env_1!();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
-            ["--color", "always"],
-            env,
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup =
+            exec_target_with_env_in(TARGET_EXE_PATH, ["--color", "always"], env, in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
             oup.stdout,
@@ -368,11 +282,12 @@ mod test_string_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -390,11 +305,12 @@ mod test_string_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -412,11 +328,12 @@ mod test_string_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -434,7 +351,8 @@ mod test_string_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--color", "always"],
@@ -461,7 +379,7 @@ mod test_string_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "-h", "1", "--color", "always"],
@@ -485,7 +403,7 @@ mod test_string_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "-t", "1", "--color", "always"],
@@ -507,16 +425,17 @@ mod test_string_color {
     }
 }
 
-mod test_numeric {
+mod test_1_numeric {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "numeric"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -531,10 +450,11 @@ mod test_numeric {
     //
     #[test]
     fn test_t2() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "numeric", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -549,10 +469,11 @@ mod test_numeric {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--according-to", "numeric"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -569,10 +490,11 @@ mod test_numeric {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--according-to", "numeric", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -589,7 +511,8 @@ mod test_numeric {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--according-to", "numeric"],
@@ -614,7 +537,7 @@ mod test_numeric {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--according-to", "numeric", "-h", "1"],
@@ -636,7 +559,7 @@ mod test_numeric {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[0-9]+", "--according-to", "numeric", "-t", "1"],
@@ -657,18 +580,19 @@ mod test_numeric {
     }
 }
 
-mod test_numeric_color {
+mod test_1_numeric_color {
     use exec_target::exec_target_with_env_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "numeric", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -684,11 +608,12 @@ mod test_numeric_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "numeric", "-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -704,6 +629,7 @@ mod test_numeric_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -715,7 +641,7 @@ mod test_numeric_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -733,6 +659,7 @@ mod test_numeric_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -745,7 +672,7 @@ mod test_numeric_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -763,7 +690,8 @@ mod test_numeric_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -797,7 +725,7 @@ mod test_numeric_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -830,7 +758,7 @@ mod test_numeric_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -861,16 +789,17 @@ mod test_numeric_color {
     }
 }
 
-mod test_version {
+mod test_1_version {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "version"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -885,10 +814,11 @@ mod test_version {
     //
     #[test]
     fn test_t2() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "version", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -903,10 +833,11 @@ mod test_version {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -923,6 +854,7 @@ mod test_version {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -932,7 +864,7 @@ mod test_version {
                 "version",
                 "-r",
             ],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -949,7 +881,8 @@ mod test_version {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
@@ -974,7 +907,7 @@ mod test_version {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1003,7 +936,7 @@ mod test_version {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1031,18 +964,19 @@ mod test_version {
     }
 }
 
-mod test_version_color {
+mod test_1_version_color {
     use exec_target::exec_target_with_env_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "version", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1058,11 +992,12 @@ mod test_version_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "version", "-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1078,6 +1013,7 @@ mod test_version_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1089,7 +1025,7 @@ mod test_version_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1107,6 +1043,7 @@ mod test_version_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1119,7 +1056,7 @@ mod test_version_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1137,7 +1074,8 @@ mod test_version_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1171,7 +1109,7 @@ mod test_version_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1204,7 +1142,7 @@ mod test_version_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1235,16 +1173,17 @@ mod test_version_color {
     }
 }
 
-mod test_month {
+mod test_1_month {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "month"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1259,10 +1198,11 @@ mod test_month {
     //
     #[test]
     fn test_t2() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "month", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1277,10 +1217,11 @@ mod test_month {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", ":([^:]+)$", "--according-to", "month"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1297,10 +1238,11 @@ mod test_month {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", ":([^:]+)$", "--according-to", "month", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1317,7 +1259,8 @@ mod test_month {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", ":([^:]+)$", "--according-to", "month"],
@@ -1342,7 +1285,7 @@ mod test_month {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", ":([^:]+)$", "--according-to", "month", "-h", "1"],
@@ -1364,7 +1307,7 @@ mod test_month {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["-e", ":([^:]+)$", "--according-to", "month", "-t", "1"],
@@ -1385,18 +1328,19 @@ mod test_month {
     }
 }
 
-mod test_month_color {
+mod test_1_month_color {
     use exec_target::exec_target_with_env_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "month", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1412,11 +1356,12 @@ mod test_month_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "month", "-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1432,6 +1377,7 @@ mod test_month_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1443,7 +1389,7 @@ mod test_month_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1461,6 +1407,7 @@ mod test_month_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1473,7 +1420,7 @@ mod test_month_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1491,7 +1438,8 @@ mod test_month_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1525,7 +1473,7 @@ mod test_month_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1558,7 +1506,7 @@ mod test_month_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1589,17 +1537,14 @@ mod test_month_color {
     }
 }
 
-mod test_time {
+mod test_1_time {
     use exec_target::exec_target_with_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "time"],
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--according-to", "time"], in_w.as_bytes());
         assert_eq!(
             oup.stderr,
             concat!(
@@ -1613,10 +1558,11 @@ mod test_time {
     //
     #[test]
     fn test_t2() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             ["--according-to", "time", "-r"],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1631,6 +1577,7 @@ mod test_time {
     //
     #[test]
     fn test_t3() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1639,7 +1586,7 @@ mod test_time {
                 "--according-to",
                 "time",
             ],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1656,6 +1603,7 @@ mod test_time {
     //
     #[test]
     fn test_t4() {
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1665,7 +1613,7 @@ mod test_time {
                 "time",
                 "-r",
             ],
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1682,7 +1630,8 @@ mod test_time {
     //
     #[test]
     fn test_t5() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1712,7 +1661,7 @@ mod test_time {
     //
     #[test]
     fn test_t6_header() {
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1741,7 +1690,7 @@ mod test_time {
     //
     #[test]
     fn test_t6_footer() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1770,7 +1719,7 @@ mod test_time {
     //
     #[test]
     fn test_t7() {
-        let in_w = super::IN_DAT_TIME.to_string();
+        let in_w = std::fs::read_to_string(fixture_time!()).unwrap();
         let oup = exec_target_with_in(
             TARGET_EXE_PATH,
             [
@@ -1804,18 +1753,19 @@ mod test_time {
     }
 }
 
-mod test_time_color {
+mod test_1_time_color {
     use exec_target::exec_target_with_env_in;
     const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
     //
     #[test]
     fn test_t1() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "time", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1831,11 +1781,12 @@ mod test_time_color {
     #[test]
     fn test_t2() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["--according-to", "time", "-r", "--color", "always"],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(
             oup.stderr,
@@ -1851,6 +1802,7 @@ mod test_time_color {
     #[test]
     fn test_t3() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1862,7 +1814,7 @@ mod test_time_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1880,6 +1832,7 @@ mod test_time_color {
     #[test]
     fn test_t4() {
         let env = env_1!();
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1892,7 +1845,7 @@ mod test_time_color {
                 "always",
             ],
             env,
-            super::IN_DAT_FRUIT.as_bytes(),
+            in_w.as_bytes(),
         );
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -1910,7 +1863,8 @@ mod test_time_color {
     #[test]
     fn test_t5() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1944,7 +1898,7 @@ mod test_time_color {
     #[test]
     fn test_t6_header() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT_HEADER.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -1977,7 +1931,7 @@ mod test_time_color {
     #[test]
     fn test_t6_footer() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT_FOOTER;
+        let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             [
@@ -2015,11 +1969,8 @@ mod test_2 {
     //
     #[test]
     fn test_max_buffer() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--max-buffer", "20"],
-            super::IN_DAT_FRUIT.as_bytes(),
-        );
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--max-buffer", "20"], in_w.as_bytes());
         assert_eq!(
             oup.stderr,
             concat!(program_name!(), ": over max buffer size: 20\n")
@@ -2030,7 +1981,8 @@ mod test_2 {
     //
     #[test]
     fn test_uniq() {
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u"], in_w.as_bytes());
         assert_eq!(oup.stderr, "");
         assert_eq!(
@@ -2048,7 +2000,8 @@ mod test_2 {
     #[test]
     fn test_uniq_color() {
         let env = env_1!();
-        let in_w = super::IN_DAT_FRUIT.to_string() + super::IN_DAT_FRUIT;
+        let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
+        let in_w = in_w.clone() + &in_w;
         let oup = exec_target_with_env_in(
             TARGET_EXE_PATH,
             ["-u", "--color", "always"],
