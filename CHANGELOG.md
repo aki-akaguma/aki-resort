@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * refactored: `run.rs`
 
 ### Fixed
+* bug: case of no match
 * minimum support version in doc
 
 ## [0.1.25] (2024-06-19)

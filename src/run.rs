@@ -36,6 +36,7 @@ where
     let mut curr_sz: usize = 0;
     let mut result_buf_lines = Vec::new();
     let mut buf_lines = Vec::new();
+    let mut match_count: usize = 0;
     //
     // read all lines
     for line in sioe.pg_in().lines() {
@@ -59,6 +60,7 @@ where
         //
         let key = if let Some(ref re) = re {
             if let Some(caps) = re.captures(line_ss) {
+                match_count += 1;
                 if let Some(mat) = caps.get(1) {
                     KeyColumns::new(mat.start(), mat.end())
                 } else if let Some(mat) = caps.get(0) {
@@ -89,12 +91,16 @@ where
     } else {
         Vec::new()
     };
-    // sort body
-    for key_line in buf_lines {
-        sort_buf_lines.push_line(key_line.key, key_line.line)?;
-    }
-    // append all lines
-    let mut body = sort_buf_lines.into_sorted_vec();
+    let mut body = if re.is_none() || match_count > 0 {
+        // sort body
+        for key_line in buf_lines {
+            sort_buf_lines.push_line(key_line.key, key_line.line)?;
+        }
+        // append all lines
+        sort_buf_lines.into_sorted_vec()
+    } else {
+        buf_lines
+    };
     result_buf_lines.append(&mut body);
     result_buf_lines.append(&mut footer);
     //
