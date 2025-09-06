@@ -183,7 +183,88 @@ mod test_0_x_options_s {
     }
 }
 
-mod test_1_string_s {
+mod test_1_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_invalid_utf8() {
+        let in_w = std::fs::read(fixture_invalid_utf8!()).unwrap();
+        let in_w_str = String::from_utf8_lossy(&in_w);
+        let (r, sioe) = do_execute!(&[] as &[&str], &in_w_str);
+        assert_eq!(buff!(sioe, serr), "");
+        // The result of sorting invalid UTF-8 is not strictly defined,
+        // but the program should not crash. We just check that it produces
+        // some output and doesn't error.
+        assert!(!buff!(sioe, sout).is_empty());
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_empty_input() {
+        let in_w = "";
+        let (r, sioe) = do_execute!(&[] as &[&str], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_input_with_empty_lines() {
+        let in_w = "b\n\na\n\nc\n";
+        let (r, sioe) = do_execute!(&[] as &[&str], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "\n\na\nb\nc\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_1_regex_options_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_regex_no_match() {
+        let in_w = "b:1\na:2\nc:3\n";
+        let (r, sioe) = do_execute!(&["-e", "d:."], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_regex_full_match() {
+        let in_w = "b:1\na:2\nc:3\n";
+        let (r, sioe) = do_execute!(&["-e", ".*"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "a:2\nb:1\nc:3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_regex_capture_group() {
+        let in_w = "b:1\na:2\nc:3\n";
+        let (r, sioe) = do_execute!(&["-e", ":(.)"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_regex_capture_group_no_match() {
+        let in_w = "b:1\na:2\nc:3\n";
+        let (r, sioe) = do_execute!(&["-e", "d(.)"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_2_string_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -316,7 +397,7 @@ mod test_1_string_s {
     }
 }
 
-mod test_1_string_color_s {
+mod test_2_string_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -464,7 +545,7 @@ mod test_1_string_color_s {
     }
 }
 
-mod test_1_numeric_2 {
+mod test_2_numeric_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -599,7 +680,7 @@ mod test_1_numeric_2 {
     }
 }
 
-mod test_1_numeric_color_s {
+mod test_2_numeric_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -803,7 +884,7 @@ mod test_1_numeric_color_s {
     }
 }
 
-mod test_1_version_s {
+mod test_2_version_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -967,7 +1048,7 @@ mod test_1_version_s {
     }
 }
 
-mod test_1_version_color_s {
+mod test_2_version_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1171,7 +1252,7 @@ mod test_1_version_color_s {
     }
 }
 
-mod test_1_month_s {
+mod test_2_month_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1309,7 +1390,7 @@ mod test_1_month_s {
     }
 }
 
-mod test_1_month_color_s {
+mod test_2_month_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1513,7 +1594,7 @@ mod test_1_month_color_s {
     }
 }
 
-mod test_1_time_s {
+mod test_2_time_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1721,7 +1802,7 @@ mod test_1_time_s {
     }
 }
 
-mod test_1_time_color_s {
+mod test_2_time_color_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1925,7 +2006,7 @@ mod test_1_time_color_s {
     }
 }
 
-mod test_2_s {
+mod test_3_s {
     use libaki_resort::*;
     use runnel::medium::stringio::{StringErr, StringIn, StringOut};
     use runnel::RunnelIoe;
@@ -1979,7 +2060,202 @@ mod test_2_s {
         );
         assert!(r.is_ok());
     }
+    //
+    #[test]
+    fn test_unique_with_reverse() {
+        let in_w = "b\na\nc\nb\na\n";
+        let (r, sioe) = do_execute!(&["-u", "-r"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "c\nb\na\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_unique_with_header() {
+        let in_w = "header\nb\na\nc\nb\na\n";
+        let (r, sioe) = do_execute!(&["-u", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "header\na\nb\nc\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_unique_with_header_and_reverse() {
+        let in_w = "header\nb\na\nc\nb\na\n";
+        let (r, sioe) = do_execute!(&["-u", "-h", "1", "-r"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "header\nc\nb\na\n");
+        assert!(r.is_ok());
+    }
 }
+
+mod test_4_combination_options_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_reverse_unique() {
+        let in_w = "b\na\nc\nb\na\n";
+        let (r, sioe) = do_execute!(&["-r", "-u"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "c\nb\na\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_reverse_head() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["-r", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\nc\na\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_reverse_tail() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["-r", "-t", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\na\nc\n");
+        assert!(r.is_ok());
+    }
+    //
+    #[test]
+    fn test_unique_head() {
+        let in_w = "b\na\nc\nb\na\n";
+        let (r, sioe) = do_execute!(&["-u", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\na\nb\nc\n");
+        assert!(r.is_ok());
+    }
+}
+
+mod test_4_invalid_option_arguments_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_head_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["-h", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_tail_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["-t", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_max_buffer_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--max-buffer", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("max-buffer: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_according_to_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--according-to", "invalid"], in_w);
+        assert!(buff!(sioe, serr).contains("according-to: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_color_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--color", "invalid"], in_w);
+        assert!(buff!(sioe, serr).contains("color: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_exp_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["-e", "["], in_w);
+        assert!(buff!(sioe, serr).contains("regex parse error"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+}
+
+mod test_4_according_to_option_s {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    use std::io::Write;
+    //
+    #[test]
+    fn test_numeric_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--according-to", "numeric"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_version_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--according-to", "version"], in_w);
+        assert!(buff!(sioe, serr).contains("unexpected character"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_month_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--according-to", "month"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid month"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_time_invalid() {
+        let in_w = "b\na\nc\n";
+        let (r, sioe) = do_execute!(&["--according-to", "time"], in_w);
+        assert!(buff!(sioe, serr).contains("unexpected character"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
+    }
+    //
+    #[test]
+    fn test_numeric_negative() {
+        let in_w = "-1\n-3\n-2\n";
+        let (r, sioe) = do_execute!(&["--according-to", "numeric"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "-3\n-2\n-1\n");
+        assert!(r.is_ok());
+    }
+    //
+    /*
+    #[test]
+    fn test_numeric_float() {
+        let in_w = "1.1\n1.0\n1.2\n";
+        let (r, sioe) = do_execute!(&["--according-to", "numeric"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "1.0\n1.1\n1.2\n");
+        assert!(r.is_ok());
+    }
+    */
+}
+
 /*
 mod test_3_s {
     use libaki_resort::*;
