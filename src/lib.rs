@@ -256,28 +256,82 @@ where
     I: IntoIterator<Item = S>,
     S: AsRef<std::ffi::OsStr>,
 {
-    let env = conf::EnvConf::new();
-    execute_env(sioe, prog_name, args, &env)
+    execute_with_env(sioe, prog_name, args, vec![("", "")])
 }
 
-pub fn execute_env<I, S>(
+/// execute resort with environments
+///
+/// params:
+///   - sioe: stream in/out/err
+///   - program: program name. etc. "resort"
+///   - env: environments array.
+///
+/// return:
+///   - ok: ()
+///   - err: anyhow
+///
+/// # Examples
+///
+/// ## Example 1: simple sort
+///
+/// This sort via utf-8 code.
+///
+/// ```rust
+/// use runnel::RunnelIoeBuilder;
+///
+/// let r = libaki_resort::execute_with_env(&RunnelIoeBuilder::new().build(),
+///     "resort",
+///     ["--color", "always"],
+///     vec![
+///         ("AKI_RESORT_COLOR_SEQ_ST", "<S>"),
+///         ("AKI_RESORT_COLOR_SEQ_ED", "<E>"),
+///     ]
+/// );
+/// ```
+///
+/// ## Example 2: numeric sort
+///
+/// This sort via 1st chunk of numeric character according to numeric.
+///
+/// ```rust
+/// use runnel::RunnelIoeBuilder;
+///
+/// let r = libaki_resort::execute_with_env(&RunnelIoeBuilder::new().build(),
+///     "resort",
+///     [
+///         "-e", r"[0-9]+",
+///         "--according-to", "numeric",
+///         "--color", "always"
+///     ],
+///     vec![
+///         ("AKI_RESORT_COLOR_SEQ_ST", "<S>"),
+///         ("AKI_RESORT_COLOR_SEQ_ED", "<E>"),
+///     ]
+/// );
+/// ```
+///
+pub fn execute_with_env<I, S, IKV, K, V>(
     sioe: &RunnelIoe,
     prog_name: &str,
     args: I,
-    env: &conf::EnvConf,
+    env: IKV,
 ) -> anyhow::Result<()>
 where
     I: IntoIterator<Item = S>,
     S: AsRef<std::ffi::OsStr>,
+    IKV: IntoIterator<Item = (K, V)>,
+    K: AsRef<std::ffi::OsStr>,
+    V: AsRef<std::ffi::OsStr>,
 {
     let args: Vec<String> = args
         .into_iter()
         .map(|s| s.as_ref().to_string_lossy().into_owned())
         .collect();
     let args_str: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    let env_cnf: conf::EnvConf = env.into();
     //
     match conf::parse_cmdopts(prog_name, &args_str) {
-        Ok(conf) => run::run(sioe, &conf, env),
+        Ok(conf) => run::run(sioe, &conf, &env_cnf),
         Err(errs) => {
             if let Some(err) = errs.iter().find(|e| e.is_help() || e.is_version()) {
                 sioe.pg_out().write_line(err.to_string())?;

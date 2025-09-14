@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 * `specs`
 * more tests
+* `execute_with_env()`
 
 ### Changed
 * `IntoIterator` compatibility for args in `execute()`
@@ -17,10 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * updated: regex(1.11)
 * downgraded: rayon = "1.10.\*"
 * refactored: `run.rs`
+* refactored `lib.rs`
 
 ### Fixed
 * bug: case of no match
 * minimum support version in doc
+
+### Removed
+* `execute_env()`
+* `base_dir=` of `-X` options
 
 ## [0.1.25] (2024-06-19)
 ### Added

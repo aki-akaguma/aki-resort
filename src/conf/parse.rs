@@ -67,7 +67,6 @@ fn opt_uc_x_help_message(_program: &str) -> String {
     let z_opts = concat!(
         "Options:\n",
         "  -X rust-version-info     display rust version info and exit\n",
-        "  -X base_dir=<path>       set <path> is base directory\n",
     );
     z_opts.to_string()
 }
