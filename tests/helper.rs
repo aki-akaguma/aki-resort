@@ -57,6 +57,21 @@ macro_rules! help_msg {
 }
 
 #[allow(unused_macros)]
+macro_rules! x_help_msg {
+    () => {
+        concat!(
+            indoc::indoc!(
+                r#"
+            Options:
+              -X rust-version-info     display rust version info and exit
+            "#
+            ),
+            "\n",
+        )
+    };
+}
+
+#[allow(unused_macros)]
 macro_rules! try_help_msg {
     () => {
         "Try --help for help.\n"
@@ -135,4 +150,14 @@ macro_rules! color_end {
     () => {
         "<E>"
     };
+}
+
+#[allow(unused_macros)]
+macro_rules! env_1 {
+    () => {{
+        vec![
+            ("AKI_RESORT_COLOR_SEQ_ST", color_start!()),
+            ("AKI_RESORT_COLOR_SEQ_ED", color_end!()),
+        ]
+    }};
 }

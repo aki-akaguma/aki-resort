@@ -1,60 +1,47 @@
-const TARGET_EXE_PATH: &str = env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")));
-
 #[macro_use]
 mod helper;
 
-macro_rules! env_1 {
-    () => {{
-        let mut env = std::collections::HashMap::new();
-        env.insert(
-            "AKI_RESORT_COLOR_SEQ_ST".to_string(),
-            color_start!().to_string(),
-        );
-        env.insert(
-            "AKI_RESORT_COLOR_SEQ_ED".to_string(),
-            color_end!().to_string(),
-        );
-        env
-    }};
-}
+#[macro_use]
+mod helper_l;
 
-mod test_0 {
-    use exec_target::exec_target;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_0_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_help() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-H"]);
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, help_msg!());
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-H"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), help_msg!());
+        assert!(r.is_ok());
     }
     #[test]
     fn test_help_long() {
-        let oup = exec_target(TARGET_EXE_PATH, ["--help"]);
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, help_msg!());
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["--help"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), help_msg!());
+        assert!(r.is_ok());
     }
     #[test]
     fn test_version() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-V"]);
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, version_msg!());
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-V"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), version_msg!());
+        assert!(r.is_ok());
     }
     #[test]
     fn test_version_long() {
-        let oup = exec_target(TARGET_EXE_PATH, ["--version"]);
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, version_msg!());
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["--version"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), version_msg!());
+        assert!(r.is_ok());
     }
     #[test]
     fn test_invalid_opt() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-z"]);
+        let (r, sioe) = do_execute!(["-z"]);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": ",
@@ -62,145 +49,134 @@ mod test_0 {
                 try_help_msg!()
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
-    /*
-    #[test]
-    fn test_non_option() {
-        let oup = exec_target(TARGET_EXE_PATH, &[] as &[&str]);
-        assert_eq!(
-            oup.stderr,
-            concat!(
-                program_name!(),
-                ": ",
-                "Missing option: e\n",
-                "Unexpected argument: \n",
-                try_help_msg!()
-            )
-        );
-        assert_eq!(oup.stdout, "");
-        assert_eq!(oup.status.success(), false);
-    }
-    */
 }
 
-mod test_0_x_options {
-    use exec_target::exec_target;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_0_x_options_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::*;
+    use runnel::*;
     //
     #[test]
     fn test_x_option_help() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help"]);
-        assert_eq!(oup.stderr, "");
-        assert!(oup.stdout.contains("Options:"));
-        assert!(oup.stdout.contains("-X rust-version-info"));
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-X", "help"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), x_help_msg!());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_x_option_rust_version_info() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-X", "rust-version-info"]);
-        assert_eq!(oup.stderr, "");
-        assert!(oup.stdout.contains("rustc"));
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
+        assert!(buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_multiple_x_options() {
-        let oup = exec_target(TARGET_EXE_PATH, ["-X", "help", "-X", "rust-version-info"]);
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-X", "help", "-X", "rust-version-info"]);
+        assert_eq!(buff!(sioe, serr), "");
         // The first one should be executed and the program should exit.
-        assert!(oup.stdout.contains("Options:"));
-        assert!(!oup.stdout.contains("rustc"));
-        assert!(oup.status.success());
+        assert!(buff!(sioe, sout).contains("Options:"));
+        assert!(!buff!(sioe, sout).contains("rustc"));
+        assert!(r.is_ok());
     }
 }
 
-mod test_1 {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_1_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_invalid_utf8() {
-        let in_w = std::fs::read(fixture_invalid_utf8!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &[] as &[&str], &in_w);
-        assert!(oup.stderr.contains("stream did not contain valid UTF-8"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let v = std::fs::read(fixture_invalid_utf8!()).unwrap();
+        let s = unsafe { String::from_utf8_unchecked(v) };
+        let (r, sioe) = do_execute!(&[] as &[&str], &s);
+        assert_eq!(
+            buff!(sioe, serr),
+            concat!(program_name!(), ": stream did not contain valid UTF-8\n",)
+        );
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_empty_input() {
         let in_w = "";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &[] as &[&str], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(&[] as &[&str], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_input_with_empty_lines() {
         let in_w = "b\n\na\n\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &[] as &[&str], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "\n\na\nb\nc\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(&[] as &[&str], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "\n\na\nb\nc\n");
+        assert!(r.is_ok());
     }
 }
 
-mod test_1_regex_options {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_1_regex_options_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_regex_no_match() {
         let in_w = "b:1\na:2\nc:3\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "d:."], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b:1\na:2\nc:3\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-e", "d:."], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_regex_full_match() {
         let in_w = "b:1\na:2\nc:3\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", ".*"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "a:2\nb:1\nc:3\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-e", ".*"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "a:2\nb:1\nc:3\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_regex_capture_group() {
         let in_w = "b:1\na:2\nc:3\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", ":(.)"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b:1\na:2\nc:3\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-e", ":(.)"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_regex_capture_group_no_match() {
         let in_w = "b:1\na:2\nc:3\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "d(.)"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b:1\na:2\nc:3\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-e", "d(.)"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b:1\na:2\nc:3\n");
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_string {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_string_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, &[] as &[&str], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(&[] as &[&str], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Apple:33:3.3:good:Mar\n",
                 "Cherry:4:4:good:Oct\n",
@@ -208,16 +184,16 @@ mod test_2_string {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t2() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-r"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -225,16 +201,16 @@ mod test_2_string {
                 "Apple:33:3.3:good:Mar\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t3() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -242,16 +218,16 @@ mod test_2_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+", "-r"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "-r"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -259,17 +235,17 @@ mod test_2_string {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "[0-9]+"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(["-e", "[0-9]+"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -281,20 +257,16 @@ mod test_2_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "-h", "1"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "-h", "1"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -303,20 +275,16 @@ mod test_2_string {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "-t", "1"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "-t", "1"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -325,23 +293,22 @@ mod test_2_string {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_string_color {
-    use exec_target::exec_target_with_env_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_string_color_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup =
-            exec_target_with_env_in(TARGET_EXE_PATH, ["--color", "always"], env, in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(env_1!(), ["--color", "always"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "<S>Apple:33:3.3:good:Mar<E>\n",
                 "<S>Cherry:4:4:good:Oct<E>\n",
@@ -349,22 +316,16 @@ mod test_2_string_color {
                 "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t2() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
-            ["-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(env_1!(), ["-r", "--color", "always"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "<S>Orange:222:1.1.2:good:Jan<E>\n",
                 "<S>Kiwi:1111:1.1.11:good:Jun<E>\n",
@@ -372,22 +333,16 @@ mod test_2_string_color {
                 "<S>Apple:33:3.3:good:Mar<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t3() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "--color", "always"],
-            env,
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(env_1!(), ["-e", "[0-9]+", "--color", "always"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
                 "Orange:<S>222<E>:1.1.2:good:Jan\n",
@@ -395,22 +350,16 @@ mod test_2_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(env_1!(), ["-e", "[0-9]+", "-r", "--color", "always"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4<E>:4:good:Oct\n",
                 "Apple:<S>33<E>:3.3:good:Mar\n",
@@ -418,23 +367,21 @@ mod test_2_string_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["-e", "[0-9]+", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            in_w.as_str()
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
@@ -446,22 +393,20 @@ mod test_2_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["-e", "[0-9]+", "-h", "1", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
@@ -470,22 +415,20 @@ mod test_2_string_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["-e", "[0-9]+", "-t", "1", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
                 "Orange:<S>222<E>:1.1.2:good:Jan\n",
@@ -494,63 +437,52 @@ mod test_2_string_color {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_numeric {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_numeric_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "numeric"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "numeric"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "numeric", "-r"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "numeric", "-r"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "--according-to", "numeric"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "--according-to", "numeric"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -558,20 +490,16 @@ mod test_2_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "--according-to", "numeric", "-r"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "--according-to", "numeric", "-r"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -579,21 +507,17 @@ mod test_2_numeric {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", "[0-9]+", "--according-to", "numeric"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(["-e", "[0-9]+", "--according-to", "numeric"], &in_w,);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
@@ -605,20 +529,19 @@ mod test_2_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             ["-e", "[0-9]+", "--according-to", "numeric", "-h", "1"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Cherry:4:4:good:Oct\n",
@@ -627,20 +550,19 @@ mod test_2_numeric {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             ["-e", "[0-9]+", "--according-to", "numeric", "-t", "1"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -649,76 +571,71 @@ mod test_2_numeric {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_numeric_color {
-    use exec_target::exec_target_with_env_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_numeric_color_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "numeric", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "numeric", "-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[0-9]+",
                 "--according-to",
                 "numeric",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4<E>:4:good:Oct\n",
                 "Apple:<S>33<E>:3.3:good:Mar\n",
@@ -726,15 +643,14 @@ mod test_2_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[0-9]+",
@@ -742,14 +658,13 @@ mod test_2_numeric_color {
                 "numeric",
                 "-r",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
                 "Orange:<S>222<E>:1.1.2:good:Jan\n",
@@ -757,30 +672,28 @@ mod test_2_numeric_color {
                 "Cherry:<S>4<E>:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[0-9]+",
                 "--according-to",
                 "numeric",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4<E>:4:good:Oct\n",
                 "Cherry:<S>4<E>:4:good:Oct\n",
@@ -792,15 +705,14 @@ mod test_2_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[0-9]+",
@@ -809,14 +721,13 @@ mod test_2_numeric_color {
                 "-h",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Cherry:<S>4<E>:4:good:Oct\n",
@@ -825,15 +736,14 @@ mod test_2_numeric_color {
                 "Kiwi:<S>1111<E>:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[0-9]+",
@@ -842,14 +752,13 @@ mod test_2_numeric_color {
                 "-t",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4<E>:4:good:Oct\n",
                 "Apple:<S>33<E>:3.3:good:Mar\n",
@@ -858,63 +767,55 @@ mod test_2_numeric_color {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_version {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_version_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "version"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "version"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "version", "-r"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "version", "-r"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             ["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -922,14 +823,13 @@ mod test_2_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
@@ -937,11 +837,11 @@ mod test_2_version {
                 "version",
                 "-r",
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -949,21 +849,20 @@ mod test_2_version {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
             ["-e", "[^:]+:[^:]+:([0-9.]+):", "--according-to", "version"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -975,27 +874,26 @@ mod test_2_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
                 "--according-to",
                 "version",
                 "-h",
-                "1",
+                "1"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -1004,27 +902,26 @@ mod test_2_version {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
                 "--according-to",
                 "version",
                 "-t",
-                "1",
+                "1"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -1033,76 +930,71 @@ mod test_2_version {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_version_color {
-    use exec_target::exec_target_with_env_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_version_color_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "version", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "version", "-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing major version number\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
                 "--according-to",
                 "version",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
                 "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
@@ -1110,15 +1002,14 @@ mod test_2_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
@@ -1126,14 +1017,13 @@ mod test_2_version_color {
                 "version",
                 "-r",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:<S>4<E>:good:Oct\n",
                 "Apple:33:<S>3.3<E>:good:Mar\n",
@@ -1141,30 +1031,28 @@ mod test_2_version_color {
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
                 "--according-to",
                 "version",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
@@ -1176,15 +1064,14 @@ mod test_2_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
@@ -1193,14 +1080,13 @@ mod test_2_version_color {
                 "-h",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
@@ -1209,15 +1095,14 @@ mod test_2_version_color {
                 "Cherry:4:<S>4<E>:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "[^:]+:[^:]+:([0-9.]+):",
@@ -1226,14 +1111,13 @@ mod test_2_version_color {
                 "-t",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:<S>1.1.2<E>:good:Jan\n",
                 "Kiwi:1111:<S>1.1.11<E>:good:Jun\n",
@@ -1242,63 +1126,52 @@ mod test_2_version_color {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_month {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_month_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "month"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "month"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "month", "-r"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "month", "-r"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", ":([^:]+)$", "--according-to", "month"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", ":([^:]+)$", "--according-to", "month"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -1306,20 +1179,16 @@ mod test_2_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["-e", ":([^:]+)$", "--according-to", "month", "-r"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let (r, sioe) = do_execute!(["-e", ":([^:]+)$", "--according-to", "month", "-r"], &in_w);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Kiwi:1111:1.1.11:good:Jun\n",
@@ -1327,21 +1196,20 @@ mod test_2_month {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
             ["-e", ":([^:]+)$", "--according-to", "month"],
-            in_w.as_bytes(),
+            in_w.as_str(),
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -1353,20 +1221,19 @@ mod test_2_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             ["-e", ":([^:]+)$", "--according-to", "month", "-h", "1"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -1375,20 +1242,19 @@ mod test_2_month {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             ["-e", ":([^:]+)$", "--according-to", "month", "-t", "1"],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:Jan\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -1397,76 +1263,71 @@ mod test_2_month {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_month_color {
-    use exec_target::exec_target_with_env_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_month_color_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "month", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "month", "-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': invalid month strings\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 ":([^:]+)$",
                 "--according-to",
                 "month",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
                 "Apple:33:3.3:good:<S>Mar<E>\n",
@@ -1474,15 +1335,14 @@ mod test_2_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 ":([^:]+)$",
@@ -1490,14 +1350,13 @@ mod test_2_month_color {
                 "month",
                 "-r",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:<S>Oct<E>\n",
                 "Kiwi:1111:1.1.11:good:<S>Jun<E>\n",
@@ -1505,30 +1364,28 @@ mod test_2_month_color {
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 ":([^:]+)$",
                 "--according-to",
                 "month",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
@@ -1540,15 +1397,14 @@ mod test_2_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 ":([^:]+)$",
@@ -1557,14 +1413,13 @@ mod test_2_month_color {
                 "-h",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
@@ -1573,15 +1428,14 @@ mod test_2_month_color {
                 "Cherry:4:4:good:<S>Oct<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 ":([^:]+)$",
@@ -1590,14 +1444,13 @@ mod test_2_month_color {
                 "-t",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Orange:222:1.1.2:good:<S>Jan<E>\n",
                 "Apple:33:3.3:good:<S>Mar<E>\n",
@@ -1606,64 +1459,60 @@ mod test_2_month_color {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_time {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_time_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--according-to", "time"], in_w.as_bytes());
+        let (r, sioe) = do_execute!(["--according-to", "time"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing time\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "time", "-r"],
-            in_w.as_bytes(),
-        );
+        let (r, sioe) = do_execute!(["--according-to", "time", "-r"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing time\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
-                "time",
+                "time"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -1671,14 +1520,13 @@ mod test_2_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
@@ -1686,11 +1534,11 @@ mod test_2_time {
                 "time",
                 "-r",
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:1111:1.1.11:good:Jun\n",
                 "Orange:222:1.1.2:good:Jan\n",
@@ -1698,26 +1546,25 @@ mod test_2_time {
                 "Cherry:4:4:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
-                "time",
+                "time"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Cherry:4:4:good:Oct\n",
@@ -1729,27 +1576,26 @@ mod test_2_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
                 "time",
                 "-h",
-                "1",
+                "1"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Cherry:4:4:good:Oct\n",
@@ -1758,27 +1604,26 @@ mod test_2_time {
                 "Kiwi:1111:1.1.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
                 "time",
                 "-t",
-                "1",
+                "1"
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:4:4:good:Oct\n",
                 "Apple:33:3.3:good:Mar\n",
@@ -1787,25 +1632,24 @@ mod test_2_time {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t7() {
         let in_w = std::fs::read_to_string(fixture_time!()).unwrap();
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
                 "time",
             ],
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "bench-c abyssiniandb \t67.91user 4.58system 1:21.45elapsed 89%CPU (655864maxresident)k\n",
                 "bench-c berkeleydb_hs \t86.01user 6.75system 2:08.07elapsed 72%CPU (2219324maxresident)k\n",
@@ -1822,76 +1666,71 @@ mod test_2_time {
                 "bench-c sqlite \t191.97user 745.43system 2:01:53elapsed 12%CPU (8788maxresident)k\n"
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_2_time_color {
-    use exec_target::exec_target_with_env_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_2_time_color_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_t1() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "time", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing time\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t2() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             ["--according-to", "time", "-r", "--color", "always"],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(
                 program_name!(),
                 ": (0,21):\'Apple:33:3.3:good:Mar\': unexpected character \'A\' while parsing time\n",
             )
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_t3() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
                 "time",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4:4<E>:good:Oct\n",
                 "Apple:<S>33:3.3<E>:good:Mar\n",
@@ -1899,15 +1738,14 @@ mod test_2_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t4() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
@@ -1915,14 +1753,13 @@ mod test_2_time_color {
                 "time",
                 "-r",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            &in_w,
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
                 "Orange:<S>222:1.1<E>.2:good:Jan\n",
@@ -1930,30 +1767,28 @@ mod test_2_time_color {
                 "Cherry:<S>4:4<E>:good:Oct\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t5() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
                 "--according-to",
                 "time",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            in_w.as_str(),
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4:4<E>:good:Oct\n",
                 "Cherry:<S>4:4<E>:good:Oct\n",
@@ -1965,15 +1800,14 @@ mod test_2_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_header() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_header!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
@@ -1982,14 +1816,13 @@ mod test_2_time_color {
                 "-h",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            in_w.as_str(),
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "name:number:version:nice:month\n",
                 "Cherry:<S>4:4<E>:good:Oct\n",
@@ -1998,15 +1831,14 @@ mod test_2_time_color {
                 "Kiwi:<S>1111:1.1<E>.11:good:Jun\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_t6_footer() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit_footer!()).unwrap();
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
+        let (r, sioe) = do_execute!(
+            env_1!(),
             [
                 "-e",
                 "([0-9]+:([0-9]+:)?[0-9]+(.[0-9]+)?)",
@@ -2015,14 +1847,13 @@ mod test_2_time_color {
                 "-t",
                 "1",
                 "--color",
-                "always",
+                "always"
             ],
-            env,
-            in_w.as_bytes(),
+            in_w.as_str(),
         );
-        assert_eq!(oup.stderr, "");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Cherry:<S>4:4<E>:good:Oct\n",
                 "Apple:<S>33:3.3<E>:good:Mar\n",
@@ -2031,35 +1862,35 @@ mod test_2_time_color {
                 "This is footer line. 1\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
 }
 
-mod test_3 {
-    use exec_target::exec_target_with_env_in;
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_3_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_max_buffer() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--max-buffer", "20"], in_w.as_bytes());
+        let (r, sioe) = do_execute!(["--max-buffer", "20"], &in_w);
         assert_eq!(
-            oup.stderr,
+            buff!(sioe, serr),
             concat!(program_name!(), ": over max buffer size: 20\n")
         );
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_uniq() {
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(["-u"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "Apple:33:3.3:good:Mar\n",
                 "Cherry:4:4:good:Oct\n",
@@ -2067,23 +1898,17 @@ mod test_3 {
                 "Orange:222:1.1.2:good:Jan\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_uniq_color() {
-        let env = env_1!();
         let in_w = std::fs::read_to_string(fixture_fruit!()).unwrap();
-        let in_w = in_w.clone() + &in_w;
-        let oup = exec_target_with_env_in(
-            TARGET_EXE_PATH,
-            ["-u", "--color", "always"],
-            env,
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
+        let in_w = in_w.to_string() + &in_w;
+        let (r, sioe) = do_execute!(env_1!(), ["-u", "--color", "always"], in_w.as_str(),);
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             concat!(
                 "<S>Apple:33:3.3:good:Mar<E>\n",
                 "<S>Cherry:4:4:good:Oct<E>\n",
@@ -2091,211 +1916,194 @@ mod test_3 {
                 "<S>Orange:222:1.1.2:good:Jan<E>\n",
             )
         );
-        assert!(oup.status.success());
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_unique_with_reverse() {
         let in_w = "b\na\nc\nb\na\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u", "-r"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "c\nb\na\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-u", "-r"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "c\nb\na\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_unique_with_header() {
         let in_w = "header\nb\na\nc\nb\na\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u", "-h", "1"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "header\na\nb\nc\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-u", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "header\na\nb\nc\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_unique_with_header_and_reverse() {
         let in_w = "header\nb\na\nc\nb\na\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u", "-h", "1", "-r"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "header\nc\nb\na\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-u", "-h", "1", "-r"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "header\nc\nb\na\n");
+        assert!(r.is_ok());
     }
 }
 
-mod test_4_combination_options {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_4_combination_options_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_reverse_unique() {
         let in_w = "b\na\nc\nb\na\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r", "-u"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "c\nb\na\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-r", "-u"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "c\nb\na\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_reverse_head() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r", "-h", "1"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b\nc\na\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-r", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\nc\na\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_reverse_tail() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-r", "-t", "1"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b\na\nc\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-r", "-t", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\na\nc\n");
+        assert!(r.is_ok());
     }
     //
     #[test]
     fn test_unique_head() {
         let in_w = "b\na\nc\nb\na\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-u", "-h", "1"], in_w.as_bytes());
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "b\na\nb\nc\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["-u", "-h", "1"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "b\na\nb\nc\n");
+        assert!(r.is_ok());
     }
 }
 
-mod test_4_invalid_option_arguments_s {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_4_invalid_option_arguments_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_head_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-h", "a"], in_w.as_bytes());
-        assert!(oup.stderr.contains("invalid digit"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["-h", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_tail_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-t", "a"], in_w.as_bytes());
-        assert!(oup.stderr.contains("invalid digit"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["-t", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_max_buffer_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--max-buffer", "a"], in_w.as_bytes());
-        assert!(oup.stderr.contains("max-buffer: can not parse"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--max-buffer", "a"], in_w);
+        assert!(buff!(sioe, serr).contains("max-buffer: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_according_to_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "invalid"],
-            in_w.as_bytes(),
-        );
-        assert!(oup.stderr.contains("according-to: can not parse"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "invalid"], in_w);
+        assert!(buff!(sioe, serr).contains("according-to: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_color_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--color", "invalid"], in_w.as_bytes());
-        assert!(oup.stderr.contains("color: can not parse"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--color", "invalid"], in_w);
+        assert!(buff!(sioe, serr).contains("color: can not parse"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_exp_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["-e", "["], in_w.as_bytes());
-        assert!(oup.stderr.contains("regex parse error"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["-e", "["], in_w);
+        assert!(buff!(sioe, serr).contains("regex parse error"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
 }
 
-mod test_4_according_to_option {
-    use exec_target::exec_target_with_in;
-    const TARGET_EXE_PATH: &str = super::TARGET_EXE_PATH;
+mod test_4_according_to_option_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
     //
     #[test]
     fn test_numeric_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "numeric"],
-            in_w.as_bytes(),
-        );
-        assert!(oup.stderr.contains("invalid digit"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "numeric"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_version_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "version"],
-            in_w.as_bytes(),
-        );
-        assert!(oup.stderr.contains("unexpected character"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "version"], in_w);
+        assert!(buff!(sioe, serr).contains("unexpected character"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_month_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "month"],
-            in_w.as_bytes(),
-        );
-        assert!(oup.stderr.contains("invalid month"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "month"], in_w);
+        assert!(buff!(sioe, serr).contains("invalid month"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_time_invalid() {
         let in_w = "b\na\nc\n";
-        let oup = exec_target_with_in(TARGET_EXE_PATH, ["--according-to", "time"], in_w.as_bytes());
-        assert!(oup.stderr.contains("unexpected character"));
-        assert_eq!(oup.stdout, "");
-        assert!(!oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "time"], in_w);
+        assert!(buff!(sioe, serr).contains("unexpected character"));
+        assert_eq!(buff!(sioe, sout), "");
+        assert!(r.is_err());
     }
     //
     #[test]
     fn test_numeric_negative() {
         let in_w = "-1\n-3\n-2\n";
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            ["--according-to", "numeric"],
-            in_w.as_bytes(),
-        );
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "-3\n-2\n-1\n");
-        assert!(oup.status.success());
+        let (r, sioe) = do_execute!(["--according-to", "numeric"], in_w);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "-3\n-2\n-1\n");
+        assert!(r.is_ok());
     }
     //
     /*
     #[test]
     fn test_numeric_float() {
         let in_w = "1.1\n1.0\n1.2\n";
-        let (r, sioe) = do_execute!(&["--according-to", "numeric"], in_w);
+        let (r, sioe) = do_execute!(["--according-to", "numeric"], in_w);
         assert_eq!(buff!(sioe, serr), "");
         assert_eq!(buff!(sioe, sout), "1.0\n1.1\n1.2\n");
         assert!(r.is_ok());
@@ -2304,62 +2112,53 @@ mod test_4_according_to_option {
 }
 
 /*
-mod test_3 {
-    use exec_target::exec_target;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
+mod test_3_l {
+    use libaki_resort::*;
+    use runnel::RunnelIoe;
+    use runnel::medium::stringio::{StringIn, StringOut, StringErr};
     //
+     * can NOT test
     #[test]
     fn test_output_broken_pipe() {
-        let cmdstr = format!(
-            "cat \"{}\" | \"{}\" -e \"A\" -f a | head -n 2",
-            fixture_text10k!(),
-            TARGET_EXE_PATH
-        );
-        let oup = exec_target("sh", &["-c", &cmdstr]);
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "aBCDEFG\nHIJKLMN\n");
-        assert_eq!(oup.status.success(), true);
     }
 }
 */
 /*
-mod test_4 {
-    use exec_target::exec_target_with_in;
-    //use exec_target::args_from;
-    const TARGET_EXE_PATH: &'static str = super::TARGET_EXE_PATH;
-
+mod test_4_l {
+    use libaki_resort::*;
+    use runnel::medium::stringio::{StringErr, StringIn, StringOut};
+    use runnel::RunnelIoe;
+    //
     //
     // [BUG] thread 'main' panicked at 'begin <= end (4 <= 2) when slicing `$2 :: $0`', /checkout/src/libcore/str/mod.rs:2221:4
     // echo "001cea1eef55.softphone.blizoo.bg" | rust-gsub -e "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$" -f "\$2 :: \$0"
     //
     #[test]
     fn test_fix_bug_1() {
-        let oup = exec_target_with_in(TARGET_EXE_PATH,
-            &[
+        let (r, sioe) = do_execute!([
                 "-e",
                 "(.*\\.){0,1}([A-Za-z0-9][A-Za-z0-9\\-]{1,61}(\\.[A-Za-z0-9]{2,}){0,1}(\\.[A-Za-z]{2,}){0,1}\\.[A-Za-z]{2,5})$",
                 "-f",
                 "$2 :: $0",
             ],
-            b"001cea1eef55.softphone.blizoo.bg\n" as &[u8]);
-        assert_eq!(oup.stderr, "");
+            "001cea1eef55.softphone.blizoo.bg\n");
+        assert_eq!(buff!(sioe, serr), "");
         assert_eq!(
-            oup.stdout,
+            buff!(sioe, sout),
             "blizoo.bg :: 001cea1eef55.softphone.blizoo.bg\n"
         );
-        assert_eq!(oup.status.success(), true);
+        assert_eq!(r.is_ok(), true);
     }
     //
     #[test]
     fn test_fix_bug_2() {
-        let oup = exec_target_with_in(
-            TARGET_EXE_PATH,
-            &["-e", "ICON=\"[^\"]*\"", "-f", ""],
-            b"abc ICON=\"ABCDEFG\" defg\n" as &[u8],
+        let (r, sioe) = do_execute!(
+            ["-e", "ICON=\"[^\"]*\"", "-f", ""],
+            "abc ICON=\"ABCDEFG\" defg\n"
         );
-        assert_eq!(oup.stderr, "");
-        assert_eq!(oup.stdout, "abc  defg\n");
-        assert_eq!(oup.status.success(), true);
+        assert_eq!(buff!(sioe, serr), "");
+        assert_eq!(buff!(sioe, sout), "abc  defg\n");
+        assert_eq!(r.is_ok(), true);
     }
 }
 */
