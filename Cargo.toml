@@ -32,9 +32,8 @@ anyhow = "1.0"
 atty = "0.2"
 flood-tide = { version="0.2", default-features=true, features=["stop_at_mm"] }
 lazy_static = "1.4"
-regex = "1.11"
+regex = "1.12"
 runnel = "0.4"
-memx-cdy = "0.1"
 semver = "1.0"
 
 rayon = "1.10.*"
