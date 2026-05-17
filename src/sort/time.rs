@@ -61,7 +61,7 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
         match c {
             '0'..='9' | ':' | '.' => (),
             _ => {
-                return Err(anyhow!("unexpected character '{}' while parsing time", c));
+                return Err(anyhow!("unexpected character '{c}' while parsing time"));
             }
         }
     }
