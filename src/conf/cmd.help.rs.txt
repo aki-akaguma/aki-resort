@@ -32,14 +32,28 @@ enum CmdOp {
     UcX,
 }
 
-impl std::convert::From<u8> for CmdOp {
-    fn from(value: u8) -> Self {
-        unsafe { std::mem::transmute(value) }
-    }
-}
 impl CmdOp {
     pub const fn to(self) -> OptNum {
         self as OptNum
+    }
+}
+
+impl std::convert::From<u8> for CmdOp {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => CmdOp::Reverse,
+            1 => CmdOp::AccordingTo,
+            2 => CmdOp::Head,
+            3 => CmdOp::Tail,
+            4 => CmdOp::Color,
+            5 => CmdOp::Exp,
+            6 => CmdOp::Unique,
+            7 => CmdOp::MaxBuffer,
+            8 => CmdOp::Help,
+            9 => CmdOp::Version,
+            10 => CmdOp::UcX,
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -90,69 +104,14 @@ impl flood_tide::HelpVersion for CmdOptConf {
     }
 }
 
-fn value_to_string(nv: &NameVal<'_>) -> Result<String, OptParseError> {
+fn value_to_type<T>(nv: &NameVal<'_>) -> Result<T, OptParseError>
+where
+    T: std::str::FromStr,
+    <T as std::str::FromStr>::Err: std::fmt::Display,
+{
     match nv.val {
-        Some(x) => Ok(x.to_string()),
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
-    }
-}
-
-fn value_to_usize(nv: &NameVal<'_>) -> Result<usize, OptParseError> {
-    match nv.val {
-        Some(x) => match x.parse::<usize>() {
+        Some(x) => match x.parse::<T>() {
             Ok(d) => Ok(d),
-            Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon_or_sho(),
-                &err.to_string(),
-            )),
-        },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
-    }
-}
-
-fn value_to_opt_according_to_word(nv: &NameVal<'_>) -> Result<OptAccordingToWord, OptParseError> {
-    match nv.val {
-        Some(s) => match FromStr::from_str(s) {
-            Ok(x) => Ok(x),
-            Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon_or_sho(),
-                &err.to_string(),
-            )),
-        },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
-    }
-}
-
-fn value_to_opt_color_when(nv: &NameVal<'_>) -> Result<OptColorWhen, OptParseError> {
-    match nv.val {
-        Some(s) => match FromStr::from_str(s) {
-            Ok(x) => Ok(x),
-            Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon_or_sho(),
-                &err.to_string(),
-            )),
-        },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
-    }
-}
-
-fn value_to_opt_max_buffer_size(nv: &NameVal<'_>) -> Result<OptMaxBufferSize, OptParseError> {
-    match nv.val {
-        Some(s) => match FromStr::from_str(s) {
-            Ok(x) => Ok(x),
-            Err(err) => Err(OptParseError::invalid_option_argument(
-                &nv.opt.lon_or_sho(),
-                &err.to_string(),
-            )),
-        },
-        None => Err(OptParseError::missing_option_argument(&nv.opt.lon_or_sho())),
-    }
-}
-
-fn value_to_opt_uc_x_param(nv: &NameVal<'_>) -> Result<OptUcXParam, OptParseError> {
-    match nv.val {
-        Some(s) => match FromStr::from_str(s) {
-            Ok(x) => Ok(x),
             Err(err) => Err(OptParseError::invalid_option_argument(
                 &nv.opt.lon_or_sho(),
                 &err.to_string(),

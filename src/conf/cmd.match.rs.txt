@@ -4,25 +4,25 @@ match CmdOp::from(nv.opt.num) {
         conf.flg_reverse = true;
     }
     CmdOp::AccordingTo => {
-        conf.opt_according_to = value_to_opt_according_to_word(nv)?;
+        conf.opt_according_to = value_to_type::<OptAccordingToWord>(nv)?;
     }
     CmdOp::Head => {
-        conf.opt_head = Some(value_to_usize(nv)?);
+        conf.opt_head = Some(value_to_type::<usize>(nv)?);
     }
     CmdOp::Tail => {
-        conf.opt_tail = Some(value_to_usize(nv)?);
+        conf.opt_tail = Some(value_to_type::<usize>(nv)?);
     }
     CmdOp::Color => {
-        conf.opt_color = value_to_opt_color_when(nv)?;
+        conf.opt_color = value_to_type::<OptColorWhen>(nv)?;
     }
     CmdOp::Exp => {
-        conf.opt_exp = value_to_string(nv)?;
+        conf.opt_exp = value_to_type::<String>(nv)?;
     }
     CmdOp::Unique => {
         conf.flg_unique = true;
     }
     CmdOp::MaxBuffer => {
-        conf.opt_max_buffer = value_to_opt_max_buffer_size(nv)?;
+        conf.opt_max_buffer = value_to_type::<OptMaxBufferSize>(nv)?;
     }
     CmdOp::Help => {
         conf.flg_help = true;
@@ -31,6 +31,6 @@ match CmdOp::from(nv.opt.num) {
         conf.flg_version = true;
     }
     CmdOp::UcX => {
-        conf.opt_uc_x.push(value_to_opt_uc_x_param(nv)?);
+        conf.opt_uc_x.push(value_to_type::<OptUcXParam>(nv)?);
     }
 }
