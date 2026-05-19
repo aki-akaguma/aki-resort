@@ -171,7 +171,8 @@ fn make_out_s(
     color_end_s: &str,
     key_line: &KeyLine,
 ) -> anyhow::Result<String> {
-    let mut out_s: String = String::new();
+    let cap = key_line.line.len() + color_start_s.len() + color_end_s.len();
+    let mut out_s: String = String::with_capacity(cap);
     out_s.push_str(&key_line.line[0..key_line.key.st]);
     if key_line.key.st < key_line.key.ed {
         out_s.push_str(color_start_s);

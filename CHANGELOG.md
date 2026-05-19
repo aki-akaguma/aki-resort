@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * changed: `src/sort/numeric.rs` now supports floating-point sorting using `f64` and `total_cmp`.
 * optimized: removed aggressive `shrink_to_fit()` in `src/run.rs` for better performance.
+* optimized: use `String::with_capacity()` for colored output in `src/run.rs`.
 * refactored: `src/sort/string.rs` to remove unnecessary `Result` wraps.
 * update crate: flood-tide(0.2.14), flood-tide-gen(0.2.2)
 * update crate: runnel(0.4.2), regex(1.12)
