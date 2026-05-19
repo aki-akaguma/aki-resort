@@ -454,7 +454,7 @@ mod test_2_numeric_l {
             buff!(sioe, serr),
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(buff!(sioe, sout), "");
@@ -469,7 +469,7 @@ mod test_2_numeric_l {
             buff!(sioe, serr),
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(buff!(sioe, sout), "");
@@ -592,7 +592,7 @@ mod test_2_numeric_color_l {
             buff!(sioe, serr),
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(buff!(sioe, sout), "");
@@ -611,7 +611,7 @@ mod test_2_numeric_color_l {
             buff!(sioe, serr),
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(buff!(sioe, sout), "");
@@ -2058,7 +2058,7 @@ mod test_4_according_to_option_l {
     fn test_numeric_invalid() {
         let in_w = "b\na\nc\n";
         let (r, sioe) = do_execute!(["--according-to", "numeric"], in_w);
-        assert!(buff!(sioe, serr).contains("invalid digit"));
+        assert!(buff!(sioe, serr).contains("invalid float literal"));
         assert_eq!(buff!(sioe, sout), "");
         assert!(r.is_err());
     }

@@ -39,14 +39,14 @@ impl SortLinesBuffer for SortLinesBufferNumeric {
 #[derive(Debug)]
 struct SortLine {
     num: usize,
-    key: i64,
+    key: f64,
     key_line: KeyLine,
 }
 
 impl SortLine {
     fn new(a_num: usize, a_key: KeyColumns, a_line: String) -> anyhow::Result<Self> {
         let key_num = a_line[a_key.st..a_key.ed]
-            .parse::<i64>()
+            .parse::<f64>()
             .with_context(|| format!("({},{}):'{}'", a_key.st, a_key.ed, a_line))?;
         Ok(Self {
             num: a_num,
@@ -66,7 +66,7 @@ impl PartialOrd for SortLine {
 impl Ord for SortLine {
     #[inline]
     fn cmp(&self, other: &SortLine) -> Ordering {
-        let r = self.key.cmp(&other.key);
+        let r = self.key.total_cmp(&other.key);
         match r {
             Ordering::Equal => self.num.cmp(&other.num),
             _ => r,
@@ -77,7 +77,7 @@ impl Ord for SortLine {
 impl PartialEq for SortLine {
     #[inline]
     fn eq(&self, other: &Self) -> bool {
-        self.key == other.key
+        self.key.total_cmp(&other.key) == Ordering::Equal
     }
 }
 

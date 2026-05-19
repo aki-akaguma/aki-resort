@@ -12,9 +12,9 @@
 
 ## Identified Issues & Recommendations
 
-### 1. Discrepancy in Numeric Sort Requirements
-- **Issue:** `specs/0.requirements.md` specifies that the `numeric` sort should interpret keys as floating-point numbers. However, `src/sort/numeric.rs` parses keys as `i64`.
-- **Recommendation:** Update `src/sort/numeric.rs` to use `f64` for parsing and comparison (considering NaN/Infinity cases) to align with requirements.
+### 1. Discrepancy in Numeric Sort Requirements (Resolved)
+- **Issue:** `specs/0.requirements.md` specifies that the `numeric` sort should interpret keys as floating-point numbers. Previously, `src/sort/numeric.rs` parsed keys as `i64`.
+- **Action:** Updated `src/sort/numeric.rs` to use `f64` for parsing and `f64::total_cmp` for comparison, ensuring full compliance with requirements including decimals and special values like NaN.
 
 ### 2. Aggressive Memory Management (Resolved)
 - **Observation:** `src/run.rs` previously called `shrink_to_fit()` on every line read.

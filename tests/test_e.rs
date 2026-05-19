@@ -483,7 +483,7 @@ mod test_2_numeric_e {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -502,7 +502,7 @@ mod test_2_numeric_e {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -639,7 +639,7 @@ mod test_2_numeric_color_e {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -659,7 +659,7 @@ mod test_2_numeric_color_e {
             oup.stderr,
             concat!(
                 program_name!(),
-                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid digit found in string\n"
+                ": (0,21):\'Apple:33:3.3:good:Mar\': invalid float literal\n"
             )
         );
         assert_eq!(oup.stdout, "");
@@ -2178,7 +2178,7 @@ mod test_4_according_to_option_e {
             ["--according-to", "numeric"],
             in_w.as_bytes(),
         );
-        assert!(oup.stderr.contains("invalid digit"));
+        assert!(oup.stderr.contains("invalid float literal"));
         assert_eq!(oup.stdout, "");
         assert!(!oup.status.success());
     }
