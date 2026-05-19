@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
+* optimized: removed aggressive `shrink_to_fit()` in `src/run.rs` for better performance.
 * refactored: `src/sort/string.rs` to remove unnecessary `Result` wraps.
 * update crate: flood-tide(0.2.14), flood-tide-gen(0.2.2)
 * update crate: runnel(0.4.2), regex(1.12)

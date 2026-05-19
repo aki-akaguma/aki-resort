@@ -16,10 +16,9 @@
 - **Issue:** `specs/0.requirements.md` specifies that the `numeric` sort should interpret keys as floating-point numbers. However, `src/sort/numeric.rs` parses keys as `i64`.
 - **Recommendation:** Update `src/sort/numeric.rs` to use `f64` for parsing and comparison (considering NaN/Infinity cases) to align with requirements.
 
-### 2. Aggressive Memory Management
-- **Observation:** `src/run.rs` calls `shrink_to_fit()` on every line read.
-- **Impact:** While this minimizes memory footprint, it may introduce significant overhead for files with a large number of short lines due to frequent reallocations.
-- **Recommendation:** Evaluate if this is strictly necessary. If memory is a concern, consider a more buffered approach or only shrinking if the capacity exceeds a certain threshold.
+### 2. Aggressive Memory Management (Resolved)
+- **Observation:** `src/run.rs` previously called `shrink_to_fit()` on every line read.
+- **Action:** Removed `shrink_to_fit()` to reduce reallocation overhead and improve processing speed, especially for large numbers of small lines.
 
 ### 3. Niche Argument Parser
 - **Observation:** The project uses `flood-tide` and `xtask` for argument parsing.
