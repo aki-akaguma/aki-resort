@@ -16,7 +16,7 @@ impl SortLinesBufferString {
 }
 impl SortLinesBuffer for SortLinesBufferString {
     fn push_line(&mut self, key: KeyColumns, line: String) -> anyhow::Result<()> {
-        let sort_line = SortLine::new(self.buf_lines.len(), key, line)?;
+        let sort_line = SortLine::new(self.buf_lines.len(), key, line);
         self.buf_lines.push(sort_line);
         Ok(())
     }
@@ -42,12 +42,11 @@ struct SortLine {
 }
 
 impl SortLine {
-    #[allow(clippy::unnecessary_wraps)]
-    fn new(a_num: usize, a_key: KeyColumns, a_line: String) -> anyhow::Result<Self> {
-        Ok(Self {
+    fn new(a_num: usize, a_key: KeyColumns, a_line: String) -> Self {
+        Self {
             num: a_num,
             key_line: KeyLine::new(a_key, a_line),
-        })
+        }
     }
     #[inline]
     fn key_str(&self) -> &str {
