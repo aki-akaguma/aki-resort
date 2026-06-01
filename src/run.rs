@@ -137,11 +137,11 @@ fn run_0(
                 sioe.pg_out().write_line(key_line.line)?;
             }
         } else {
-            let mut pre_line = String::new();
+            let mut pre_line: Option<String> = None;
             for key_line in v {
-                if pre_line != key_line.line {
+                if pre_line.as_ref() != Some(&key_line.line) {
                     sioe.pg_out().write_line(key_line.line.clone())?;
-                    pre_line = key_line.line;
+                    pre_line = Some(key_line.line);
                 }
             }
         }
@@ -151,12 +151,12 @@ fn run_0(
             sioe.pg_out().write_line(out_s)?;
         }
     } else {
-        let mut pre_line = String::new();
+        let mut pre_line: Option<String> = None;
         for key_line in v {
-            if pre_line != key_line.line {
+            if pre_line.as_ref() != Some(&key_line.line) {
                 let out_s = make_out_s(color_start_s, color_end_s, &key_line)?;
                 sioe.pg_out().write_line(out_s)?;
-                pre_line = key_line.line;
+                pre_line = Some(key_line.line);
             }
         }
     }
