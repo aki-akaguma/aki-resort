@@ -67,15 +67,26 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
     }
     //
     let key_s = s;
-    let (millis, idx) = if key_s.is_empty() {
+    let (nanos, idx) = if key_s.is_empty() {
         (0, 0)
     } else {
         match key_s.rfind('.') {
             Some(idx) => {
-                let num = &key_s[(idx + 1)..]
+                let frac_str = &key_s[(idx + 1)..];
+                let mut num = frac_str
                     .parse::<u64>()
-                    .with_context(|| format!("can not parse millis: '{}'", &key_s[idx..]))?;
-                (*num, idx)
+                    .with_context(|| format!("can not parse fractional: '{frac_str}'"))?;
+                // Adjust to nanoseconds
+                let mut len = frac_str.len();
+                while len < 9 {
+                    num *= 10;
+                    len += 1;
+                }
+                while len > 9 {
+                    num /= 10;
+                    len -= 1;
+                }
+                (num, idx)
             }
             None => (0, key_s.len()),
         }
@@ -88,13 +99,18 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
             Some(idx) => {
                 let num = &key_s[(idx + 1)..].parse::<u64>().with_context(|| {
                     format!(
-                        "can not parse seconds: '{}', already: {millis}ms",
+                        "can not parse seconds: '{}', already: {nanos}ns",
                         &key_s[idx..]
                     )
                 })?;
                 (*num, idx)
             }
-            None => (0, key_s.len()),
+            None => {
+                let num = key_s
+                    .parse::<u64>()
+                    .with_context(|| format!("can not parse seconds: '{key_s}'"))?;
+                (num, 0)
+            }
         }
     };
     let key_s = &key_s[..idx];
@@ -106,7 +122,7 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
             None => (key_s, 0),
         };
         let num = kk.parse::<u64>().with_context(|| {
-            format!("can not parse minutes: '{kk}', already: {seconds}.{millis}")
+            format!("can not parse minutes: '{kk}', already: {seconds}.{nanos}ns")
         })?;
         (num, ii)
     };
@@ -115,15 +131,14 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
         (0, 0)
     } else {
         let num = key_s.parse::<u64>().with_context(|| {
-            format!("can not parse hours: '{key_s}', already: {minutes}:{seconds}.{millis}")
+            format!("can not parse hours: '{key_s}', already: {minutes}:{seconds}.{nanos}ns")
         })?;
         (num, key_s.len())
     };
     //
-    //eprintln!("AAA: {hours}:{minutes}:{seconds}.{millis}");
     let dur_sec = Duration::from_secs(hours * 60 * 60 + minutes * 60 + seconds);
-    let dur_milli = Duration::from_millis(millis);
-    Ok(dur_sec + dur_milli)
+    let dur_nano = Duration::from_nanos(nanos);
+    Ok(dur_sec + dur_nano)
 }
 
 impl PartialOrd for SortLine {
@@ -170,5 +185,12 @@ mod debug {
         assert_eq!(std::mem::size_of::<SortLine>(), 36);
         #[cfg(any(target_arch = "arm", target_arch = "mips"))]
         assert_eq!(std::mem::size_of::<SortLine>(), 40);
+    }
+
+    #[test]
+    fn test_make_time_frac() {
+        assert_eq!(make_time("1.5").unwrap(), Duration::from_millis(1500));
+        assert_eq!(make_time("1.05").unwrap(), Duration::from_millis(1050));
+        assert_eq!(make_time("1.005").unwrap(), Duration::from_millis(1005));
     }
 }
