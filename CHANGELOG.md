@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 * bug: fractional seconds parsing error in `--according-to time`
+* bug: incorrect time parsing when components (hours/minutes) are missing in `--according-to time`
 * clippy: `uninlined-format-args`
 
 

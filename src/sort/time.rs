@@ -67,73 +67,57 @@ fn make_time(s: &str) -> anyhow::Result<Duration> {
     }
     //
     let key_s = s;
-    let (nanos, idx) = if key_s.is_empty() {
-        (0, 0)
-    } else {
-        match key_s.rfind('.') {
-            Some(idx) => {
-                let frac_str = &key_s[(idx + 1)..];
-                let mut num = frac_str
-                    .parse::<u64>()
-                    .with_context(|| format!("can not parse fractional: '{frac_str}'"))?;
-                // Adjust to nanoseconds
-                let mut len = frac_str.len();
-                while len < 9 {
-                    num *= 10;
-                    len += 1;
-                }
-                while len > 9 {
-                    num /= 10;
-                    len -= 1;
-                }
-                (num, idx)
+    let (nanos, key_s) = match key_s.rfind('.') {
+        Some(idx) => {
+            let frac_str = &key_s[(idx + 1)..];
+            let mut num = frac_str
+                .parse::<u64>()
+                .with_context(|| format!("can not parse fractional: '{frac_str}'"))?;
+            // Adjust to nanoseconds
+            let mut len = frac_str.len();
+            while len < 9 {
+                num *= 10;
+                len += 1;
             }
-            None => (0, key_s.len()),
+            while len > 9 {
+                num /= 10;
+                len -= 1;
+            }
+            (num, &key_s[..idx])
         }
+        None => (0, key_s),
     };
-    let key_s = &key_s[..idx];
-    let (seconds, idx) = if key_s.is_empty() {
-        (0, 0)
-    } else {
-        match key_s.rfind(':') {
-            Some(idx) => {
-                let num = &key_s[(idx + 1)..].parse::<u64>().with_context(|| {
-                    format!(
-                        "can not parse seconds: '{}', already: {nanos}ns",
-                        &key_s[idx..]
-                    )
-                })?;
-                (*num, idx)
-            }
-            None => {
-                let num = key_s
-                    .parse::<u64>()
-                    .with_context(|| format!("can not parse seconds: '{key_s}'"))?;
-                (num, 0)
-            }
-        }
-    };
-    let key_s = &key_s[..idx];
-    let (minutes, idx) = if key_s.is_empty() {
-        (0, 0)
-    } else {
-        let (kk, ii) = match key_s.rfind(':') {
-            Some(idx) => (&key_s[(idx + 1)..], idx),
-            None => (key_s, 0),
-        };
-        let num = kk.parse::<u64>().with_context(|| {
-            format!("can not parse minutes: '{kk}', already: {seconds}.{nanos}ns")
-        })?;
-        (num, ii)
-    };
-    let key_s = &key_s[..idx];
-    let (hours, _idx) = if key_s.is_empty() {
-        (0, 0)
-    } else {
-        let num = key_s.parse::<u64>().with_context(|| {
-            format!("can not parse hours: '{key_s}', already: {minutes}:{seconds}.{nanos}ns")
-        })?;
-        (num, key_s.len())
+    //
+    let parts: Vec<&str> = key_s.split(':').collect();
+    let (hours, minutes, seconds) = match parts.len() {
+        1 => (
+            0,
+            0,
+            parts[0]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse seconds: '{}'", parts[0]))?,
+        ),
+        2 => (
+            0,
+            parts[0]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse minutes: '{}'", parts[0]))?,
+            parts[1]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse seconds: '{}'", parts[1]))?,
+        ),
+        3 => (
+            parts[0]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse hours: '{}'", parts[0]))?,
+            parts[1]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse minutes: '{}'", parts[1]))?,
+            parts[2]
+                .parse::<u64>()
+                .with_context(|| format!("can not parse seconds: '{}'", parts[2]))?,
+        ),
+        _ => return Err(anyhow!("unexpected time format: '{s}'")),
     };
     //
     let dur_sec = Duration::from_secs(hours * 60 * 60 + minutes * 60 + seconds);
@@ -192,5 +176,16 @@ mod debug {
         assert_eq!(make_time("1.5").unwrap(), Duration::from_millis(1500));
         assert_eq!(make_time("1.05").unwrap(), Duration::from_millis(1050));
         assert_eq!(make_time("1.005").unwrap(), Duration::from_millis(1005));
+
+        // New tests for colon-based parsing
+        assert_eq!(make_time("20.5").unwrap(), Duration::from_millis(20500));
+        assert_eq!(
+            make_time("1:20.5").unwrap(),
+            Duration::from_secs(80) + Duration::from_millis(500)
+        );
+        assert_eq!(
+            make_time("1:1:20.5").unwrap(),
+            Duration::from_secs(3680) + Duration::from_millis(500)
+        );
     }
 }
