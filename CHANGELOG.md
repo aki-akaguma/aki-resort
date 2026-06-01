@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 * bug: fractional seconds parsing error in `--according-to time`
 * bug: incorrect time parsing when components (hours/minutes) are missing in `--according-to time`
+* bug: panic in tail processing when tail size exceeds total line count
+* bug: inconsistent sorting behavior with regex (unmatched lines are now placed at the end)
+* bug: unique flag skipping the first empty line
 * clippy: `uninlined-format-args`
 
 

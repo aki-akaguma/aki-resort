@@ -78,7 +78,7 @@ where
     // remove footer
     let mut footer = if let Some(n) = conf.opt_tail {
         if n > 0 {
-            let at = buf_lines.len() - n;
+            let at = buf_lines.len().saturating_sub(n);
             let mut buf = buf_lines.split_off(at);
             for v in buf.iter_mut() {
                 v.key = KeyColumns::new(0, 0);
