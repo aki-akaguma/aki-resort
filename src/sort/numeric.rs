@@ -66,10 +66,17 @@ impl PartialOrd for SortLine {
 impl Ord for SortLine {
     #[inline]
     fn cmp(&self, other: &SortLine) -> Ordering {
-        let r = self.key.total_cmp(&other.key);
-        match r {
-            Ordering::Equal => self.num.cmp(&other.num),
-            _ => r,
+        match (self.key_line.key.matched, other.key_line.key.matched) {
+            (true, true) => {
+                let r = self.key.total_cmp(&other.key);
+                match r {
+                    Ordering::Equal => self.num.cmp(&other.num),
+                    _ => r,
+                }
+            }
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            (false, false) => self.num.cmp(&other.num),
         }
     }
 }
@@ -90,12 +97,12 @@ mod debug {
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferNumeric>(), 32);
-        assert_eq!(std::mem::size_of::<SortLine>(), 56);
+        assert_eq!(std::mem::size_of::<SortLine>(), 64);
     }
     #[cfg(target_pointer_width = "32")]
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<SortLinesBufferNumeric>(), 16);
-        assert_eq!(std::mem::size_of::<SortLine>(), 32);
+        assert_eq!(std::mem::size_of::<SortLine>(), 40);
     }
 }

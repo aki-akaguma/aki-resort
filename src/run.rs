@@ -51,7 +51,7 @@ where
         //
         if let Some(n) = conf.opt_head {
             if result_buf_lines.len() < n {
-                let key = KeyColumns::new(0, 0);
+                let key = KeyColumns::new(0, 0, true);
                 result_buf_lines.push(KeyLine::new(key, line_s));
                 continue;
             }
@@ -61,17 +61,17 @@ where
             if let Some(caps) = re.captures(line_ss) {
                 match_count += 1;
                 if let Some(mat) = caps.get(1) {
-                    KeyColumns::new(mat.start(), mat.end())
+                    KeyColumns::new(mat.start(), mat.end(), true)
                 } else if let Some(mat) = caps.get(0) {
-                    KeyColumns::new(mat.start(), mat.end())
+                    KeyColumns::new(mat.start(), mat.end(), true)
                 } else {
                     unreachable!();
                 }
             } else {
-                KeyColumns::new(0, line_len)
+                KeyColumns::new(0, line_len, false)
             }
         } else {
-            KeyColumns::new(0, line_len)
+            KeyColumns::new(0, line_len, true)
         };
         buf_lines.push(KeyLine::new(key, line_s));
     }
@@ -81,7 +81,7 @@ where
             let at = buf_lines.len().saturating_sub(n);
             let mut buf = buf_lines.split_off(at);
             for v in buf.iter_mut() {
-                v.key = KeyColumns::new(0, 0);
+                v.key = KeyColumns::new(0, 0, true);
             }
             buf
         } else {

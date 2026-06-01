@@ -64,12 +64,19 @@ impl PartialOrd for SortLine {
 impl Ord for SortLine {
     #[inline]
     fn cmp(&self, other: &SortLine) -> Ordering {
-        let one = self.key_str();
-        let two = other.key_str();
-        let r = one.cmp(two);
-        match r {
-            Ordering::Equal => self.num.cmp(&other.num),
-            _ => r,
+        match (self.key_line.key.matched, other.key_line.key.matched) {
+            (true, true) => {
+                let one = self.key_str();
+                let two = other.key_str();
+                let r = one.cmp(two);
+                match r {
+                    Ordering::Equal => self.num.cmp(&other.num),
+                    _ => r,
+                }
+            }
+            (true, false) => Ordering::Less,
+            (false, true) => Ordering::Greater,
+            (false, false) => self.num.cmp(&other.num),
         }
     }
 }
@@ -93,13 +100,13 @@ mod debug {
     fn size_of() {
         assert_eq!(std::mem::size_of::<String>(), 24);
         assert_eq!(std::mem::size_of::<SortLinesBufferString>(), 32);
-        assert_eq!(std::mem::size_of::<SortLine>(), 48);
+        assert_eq!(std::mem::size_of::<SortLine>(), 56);
     }
     #[cfg(target_pointer_width = "32")]
     #[test]
     fn size_of() {
         assert_eq!(std::mem::size_of::<String>(), 12);
         assert_eq!(std::mem::size_of::<SortLinesBufferString>(), 16);
-        assert_eq!(std::mem::size_of::<SortLine>(), 24);
+        assert_eq!(std::mem::size_of::<SortLine>(), 32);
     }
 }

@@ -14,10 +14,15 @@ pub use version::SortLinesBufferVersion;
 pub(crate) struct KeyColumns {
     pub st: usize,
     pub ed: usize,
+    pub matched: bool,
 }
 impl KeyColumns {
-    pub fn new(a_st: usize, a_ed: usize) -> Self {
-        Self { st: a_st, ed: a_ed }
+    pub fn new(a_st: usize, a_ed: usize, a_matched: bool) -> Self {
+        Self {
+            st: a_st,
+            ed: a_ed,
+            matched: a_matched,
+        }
     }
 }
 
@@ -46,13 +51,13 @@ mod debug {
     #[cfg(target_pointer_width = "64")]
     #[test]
     fn size_of() {
-        assert_eq!(std::mem::size_of::<KeyColumns>(), 16);
-        assert_eq!(std::mem::size_of::<KeyLine>(), 40);
+        assert_eq!(std::mem::size_of::<KeyColumns>(), 24);
+        assert_eq!(std::mem::size_of::<KeyLine>(), 48);
     }
     #[cfg(target_pointer_width = "32")]
     #[test]
     fn size_of() {
-        assert_eq!(std::mem::size_of::<KeyColumns>(), 8);
-        assert_eq!(std::mem::size_of::<KeyLine>(), 20);
+        assert_eq!(std::mem::size_of::<KeyColumns>(), 12);
+        assert_eq!(std::mem::size_of::<KeyLine>(), 24);
     }
 }
