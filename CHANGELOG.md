@@ -2,272 +2,271 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
 ### Fixed
-* bug: fractional seconds parsing error in `--according-to time`
-* bug: incorrect time parsing when components (hours/minutes) are missing in `--according-to time`
-* bug: panic in tail processing when tail size exceeds total line count
-* bug: inconsistent sorting behavior with regex (unmatched lines are now placed at the end)
-* bug: unique flag skipping the first empty line
-* clippy: `uninlined-format-args`
+- Handle fractional seconds parsing correctly in `--according-to time`
+- Correct time parsing when components (hours/minutes) are missing in `--according-to time`
+- Prevent panic in tail processing when tail size exceeds total line count
+- Ensure consistent sorting behavior with regex by placing unmatched lines at the end
+- Ensure unique flag does not skip the first empty line
+- Resolve `clippy::uninlined_format_args` warnings
 
+## [0.2.1] - 2026-05-19
 
-## [0.2.1] (2026-05-19)
 ### Changed
-* changed: `src/sort/numeric.rs` now supports floating-point sorting using `f64` and `total_cmp`.
-* optimized: removed aggressive `shrink_to_fit()` in `src/run.rs` for better performance.
-* optimized: use `String::with_capacity()` for colored output in `src/run.rs`.
-* refactored: `src/sort/string.rs` to remove unnecessary `Result` wraps.
-* update crate: flood-tide(0.2.14), flood-tide-gen(0.2.2)
-* update crate: runnel(0.4.2), regex(1.12)
-* minimum support rustc 1.68.0 (2c8cc3432 2023-03-06)
+- Support floating-point sorting using `f64` and `total_cmp` in `src/sort/numeric.rs`
+- Remove aggressive `shrink_to_fit()` in `src/run.rs` for better performance
+- Use `String::with_capacity()` for colored output in `src/run.rs`
+- Remove unnecessary `Result` wraps in `src/sort/string.rs`
+- Update dependencies: `flood-tide` (0.2.14), `flood-tide-gen` (0.2.2), `runnel` (0.4.2), and `regex` (1.12)
+- Bump minimum supported Rust version to 1.68.0
 
 ### Fixed
-* `clippy::uninlined-format-args`
-* `clippy::needless_borrow`
+- `clippy::uninlined_format_args` and `clippy::needless_borrow` warnings
 
 ### Removed
-* `memx-cdy`
+- `memx-cdy` dependency
 
-## [0.2.0] (2025-09-15)
+## [0.2.0] - 2025-09-15
+
 ### Added
-* `specs`
-* more tests
-* `execute_with_env()`
+- Project specifications in `specs` directory
+- Comprehensive test coverage
+- `execute_with_env()` function
 
 ### Changed
-* `IntoIterator` compatibility for args in `execute()`
-* updated: runnel(0.4.0)
-* updated: rust-version-info-file(0.2)
-* updated: regex(1.11)
-* downgraded: rayon = "1.10.\*"
-* refactored: `run.rs`
-* refactored `lib.rs`
+- `IntoIterator` compatibility for arguments in `execute()`
+- Update dependencies: `runnel` (0.4.0), `rust-version-info-file` (0.2), and `regex` (1.11)
+- Downgrade `rayon` to `1.10.*`
+- Refactor `src/run.rs` and `src/lib.rs` for better maintainability
 
 ### Fixed
-* bug: case of no match
-* minimum support version in doc
+- Handling of cases with no matches
+- Minimum supported version in documentation
 
 ### Removed
-* `execute_env()`
-* `base_dir=` of `-X` options
+- `execute_env()` function
+- `base_dir=` from `-X` options
 
-## [0.1.25] (2024-06-19)
+## [0.1.25] - 2024-06-19
+
 ### Added
-* `.github/workflows/test-ubuntu.yml`
-* `.github/workflows/test-macos.yml`
-* `.github/workflows/test-windows.yml`
-* test status badges into `README.tpl`
-* miri supports on tests
-* `tarpaulin` supports into `Makefile`
+- GitHub Actions workflows for Ubuntu, macOS, and Windows
+- Test status badges in `README.tpl`
+- Miri support for tests
+- Tarpaulin support in `Makefile`
 
 ### Changed
-* rename: `config` to `config.toml`
-* remove: `cfg(has_not_matches)`
-* rust-version: "1.58.0" to "1.65.0"
-* refactored `Makefile`
-* update depends: flood-tide(0.2.11), flood-tide-gen(0.1.22)
-* update depends: memx-cdy(0.1.13), runnel(0.3.19)
-* update depends: exec-taget(0.2.8), indoc(2.0.0), rust-version-info-file(0.1.10)
+- Rename `config` to `config.toml`
+- Bump minimum supported Rust version to 1.65.0
+- Refactor `Makefile`
+- Update dependencies: `flood-tide` (0.2.11), `flood-tide-gen` (0.1.22), `memx-cdy` (0.1.13), `runnel` (0.3.19), `exec-target` (0.2.8), `indoc` (2.0.0), and `rust-version-info-file` (0.1.10)
 
 ### Removed
-* `COPYING`
+- `COPYING` file
 
 ### Fixed
-* `LICENSE-APACHE`, `LICENSE-MIT`
-* license files
-* clippy: `redundant_static_lifetimes`, `needless_borrow`, `bool_assert_comparison`
-* clippy: `uninlined_format_args`, `unused_imports`, `non_canonical_partial_ord_impl`
-* rust-version: "1.56.0" to "1.58.0"
+- `LICENSE-APACHE` and `LICENSE-MIT` files
+- License file consistency
+- Clippy warnings: `redundant_static_lifetimes`, `needless_borrow`, `bool_assert_comparison`, `uninlined_format_args`, `unused_imports`, and `non_canonical_partial_ord_impl`
+- Minimum supported Rust version from 1.56.0 to 1.58.0
 
-## [0.1.24] (2023-01-17)
-### Fixed
-* bug: can not parse hours: '': invalid digit found in string
-
-## [0.1.23] (2023-01-11)
-### Added
-* badges into `README.tpl`
-* rust-version = "1.56.0" into Cargo.toml
-
-### Changed
-* reformat `CHANGELOG.md`
-* update depends: anyhow(1.0.68)
-* update depends: flood-tide(0.2.8), flood-tide-gen(0.1.19)
-* update depends: memx-cdy(0.1.10), runnel(0.3.15)
-* update depends: regex(1.7.1)
-* update depends: rayon(1.6.1), semver(1.0.16)
+## [0.1.24] - 2023-01-17
 
 ### Fixed
-* clippy: you are deriving `PartialEq` and can implement `Eq`
-* clippy: uninlined_format_args
+- Hour parsing error when encountering empty strings
 
-## [0.1.22] (2022-06-18)
-### Changed
-* changes to edition 2021
-* update depends: flood-tide(0.2.5)
-* update depends: memx(0.1.21), memx-cdy(0.1.8), runnel(0.3.11)
-* update depends: exec-target(v0.2.6), flood-tide-gen(0.1.16)
-* update depends: rust-version-info-file(v0.1.6)
-* update depends: semver(1.0.10)
-* update depends: crossbeam-channel(0.5.5)
+## [0.1.23] - 2023-01-11
 
-## [0.1.21] (2022-05-22)
-### Changed
-* update depends: runnel(0.3.10), memx(0.1.20)
-* update depends: anyhow(1.0.57), libc(0.2.126), regex(1.5.6), rayon(1.5.3)
-* update depends: exec-target(v0.2.5), rust-version-info-file(v0.1.5)
-
-## [0.1.20] (2021-12-18)
 ### Added
-* command option: `--according-to` time.
+- Badges in `README.tpl`
+- `rust-version = "1.56.0"` in `Cargo.toml`
 
 ### Changed
-* update depends: anyhow(1.0.51), libc(0.2.112)
-
-## [0.1.19] (2021-11-15)
-### Added
-* more documents
-
-### Changed
-* minimum support rustc 1.47.0 (18bf6b4f0 2020-10-07)
-* update depends: flood-tide(0.2.4), memx(0.1.18), memx-cdy(0.1.7), runnel(0.3.9)
-* update depends: anyhow(1.0.45), libc(0.2.107)
-* update depends: exec-target(v0.2.4), flood-tide-gen(0.1.15), rust-version-info-file(v0.1.3)
-
-## [0.1.18] (2021-09-11)
-### Added
-* depends: indoc(1.0.3)
-
-### Changed
-* pass cargo clippy
-* update depends: anyhow(1.0.43), flood-tide-gen(0.1.14), flood-tide(0.2.3), memx-cdy(0.1.6), runnel(0.3.8)
-* rewite TARGET_EXE_PATH with `env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")))`
-* update depends: exec-target(0.2.3)
-
-## [0.1.17] (2021-06-24)
-### Added
-* `memx_cdy::memx_init(); // fast mem operation.`
-
-### Changed
-* rewite TARGET_EXE_PATH with `env!("CARGO_BIN_EXE_aki-resort")`
+- Reformat `CHANGELOG.md`
+- Update dependencies: `anyhow` (1.0.68), `flood-tide` (0.2.8), `flood-tide-gen` (0.1.19), `memx-cdy` (0.1.10), `runnel` (0.3.15), `regex` (1.7.1), `rayon` (1.6.1), and `semver` (1.0.16)
 
 ### Fixed
-* bug: `#[cfg(feature = "debian_build")]`
+- Clippy warnings: `PartialEq` derivation without `Eq` implementation, and `uninlined_format_args`
 
-## [0.1.16] (2021-06-06)
+## [0.1.22] - 2022-06-18
+
 ### Changed
-* update depends: semver(1.0.3)
+- Migrate to Rust 2021 edition
+- Update dependencies: `flood-tide` (0.2.5), `memx` (0.1.21), `memx-cdy` (0.1.8), `runnel` (0.3.11), `exec-target` (0.2.6), `flood-tide-gen` (0.1.16), `rust-version-info-file` (0.1.6), `semver` (1.0.10), and `crossbeam-channel` (0.5.5)
 
-## [0.1.15] (2021-06-03)
+## [0.1.21] - 2022-05-22
+
+### Changed
+- Update dependencies: `runnel` (0.3.10), `memx` (0.1.20), `anyhow` (1.0.57), `libc` (0.2.126), `regex` (1.5.6), `rayon` (1.5.3), `exec-target` (0.2.5), and `rust-version-info-file` (0.1.5)
+
+## [0.1.20] - 2021-12-18
+
 ### Added
-* support `features = \["debian_build"\]`
+- `--according-to time` command option
 
 ### Changed
-* update depends: flood-tide(0.2.2)
-* update depends: regex(1.5.4)
+- Update dependencies: `anyhow` (1.0.51) and `libc` (0.2.112)
+
+## [0.1.19] - 2021-11-15
+
+### Added
+- Additional documentation
+
+### Changed
+- Bump minimum supported Rust version to 1.47.0
+- Update dependencies: `flood-tide` (0.2.4), `memx` (0.1.18), `memx-cdy` (0.1.7), `runnel` (0.3.9), `anyhow` (1.0.45), `libc` (0.2.107), `exec-target` (0.2.4), `flood-tide-gen` (0.1.15), and `rust-version-info-file` (0.1.3)
+
+## [0.1.18] - 2021-09-11
+
+### Added
+- `indoc` (1.0.3) dependency
+
+### Changed
+- Address all `cargo clippy` warnings
+- Update dependencies: `anyhow` (1.0.43), `flood-tide-gen` (0.1.14), `flood-tide` (0.2.3), `memx-cdy` (0.1.6), `runnel` (0.3.8), and `exec-target` (0.2.3)
+- Use `env!(concat!("CARGO_BIN_EXE_", env!("CARGO_PKG_NAME")))` for `TARGET_EXE_PATH`
+
+## [0.1.17] - 2021-06-24
+
+### Added
+- Fast memory operations via `memx_cdy::memx_init()`
+
+### Changed
+- Use `env!("CARGO_BIN_EXE_aki-resort")` for `TARGET_EXE_PATH`
 
 ### Fixed
-* bug: command option: -X rust-version-info
+- Issue with `#[cfg(feature = "debian_build")]`
 
-## [0.1.14] (2021-05-03)
-### Added
-* support 32bit cpus: i686, armv7, mipsel
+## [0.1.16] - 2021-06-06
 
 ### Changed
-* update depends: regex(1.5.3)
+- Update dependencies: `semver` (1.0.3)
+
+## [0.1.15] - 2021-06-03
+
+### Added
+- Support for `debian_build` feature
+
+### Changed
+- Update dependencies: `flood-tide` (0.2.2) and `regex` (1.5.4)
 
 ### Fixed
-* bug: this arithmetic operation will overflow: 1024 * 1024 * 1024 * 1024 on i686
+- Bug in `-X rust-version-info` command option
 
-## [0.1.13] (2021-04-23)
-### Fixed
-* bug: build.rs
+## [0.1.14] - 2021-05-03
 
-## [0.1.12] (2021-04-23)
 ### Added
-* command option: `-X`
+- Support for 32-bit CPUs: i686, armv7, and mipsel
 
 ### Changed
-* update depends: flood-tide-gen(0.1.12), flood-tide(0.2.1)
-* update depends: bug fix: regex(1.4.6)
-
-## [0.1.11] (2021-04-19)
-### Changed
-* update depends: flood-tide-gen(0.1.10)
-
-## [0.1.10] (2021-04-07)
-### Changed
-* update depends: flood-tide(0.2)
-* update depends: anyhow(1.0.40), flood-tide-gen(0.1.8), runnnel(0.3.6)
-
-## [0.1.9] (2021-04-01)
-### Added
-* command option: `--head` and `--tail`
-
-### Changed
-* update depend: anyhow(1.0.40)
+- Update dependencies: `regex` (1.5.3)
 
 ### Fixed
-* bug: should not coloring at the empty match.
+- Arithmetic overflow on i686 (1024 * 1024 * 1024 * 1024)
 
-## [0.1.8] (2021-03-22)
-### Added
-* command option: `--color <when>`
-* some contents to `--help`
+## [0.1.13] - 2021-04-23
 
-### Changed
-* update depend: regex v1.4.5: fixes stack overflows
-
-## [0.1.7] (2021-03-14)
-### Changed
-* update crate: regex: fix memory leak
-
-## [0.1.6] (2021-03-08)
-### Changed
-* update crate: runnel
-* update crate: rustc_version ("0.3")
-
-## [0.1.5] (2021-03-08)
-### Changed
-* update crate: runnel
-
-## [0.1.4] (2021-03-07)
-### Changed
-* use rayon::slice::ParallelSliceMut, for parallel sort
-* rename file: xtask/src/cmd.txt to xtask/src/aki-resort-cmd.txt
-
-## [0.1.3] (2021-03-06)
 ### Fixed
-* bug: too large memory
+- Issues in `build.rs`
 
-## [0.1.2] (2021-03-05)
+## [0.1.12] - 2021-04-23
+
 ### Added
-* implement option: `-u, --unique`
-* implement option: `--according-to version`
-* implement option: `--according-to month`
-* add many doc
+- `-X` command option
 
 ### Changed
-* rename directory `sort_key` to `sort`
+- Update dependencies: `flood-tide-gen` (0.1.12), `flood-tide` (0.2.1), and `regex` (1.4.6)
+
+## [0.1.11] - 2021-04-19
+
+### Changed
+- Update dependencies: `flood-tide-gen` (0.1.10)
+
+## [0.1.10] - 2021-04-07
+
+### Changed
+- Update dependencies: `flood-tide` (0.2), `anyhow` (1.0.40), `flood-tide-gen` (0.1.8), and `runnel` (0.3.6)
+
+## [0.1.9] - 2021-04-01
+
+### Added
+- `--head` and `--tail` command options
+
+### Changed
+- Update dependencies: `anyhow` (1.0.40)
+
+### Fixed
+- Unwanted coloring on empty matches
+
+## [0.1.8] - 2021-03-22
+
+### Added
+- `--color <when>` command option
+- Additional content to `--help`
+
+### Changed
+- Update `regex` to v1.4.5 to resolve stack overflows
+
+## [0.1.7] - 2021-03-14
+
+### Changed
+- Update `regex` to resolve a memory leak
+
+## [0.1.6] - 2021-03-08
+
+### Changed
+- Update `runnel` and `rustc_version` (0.3) dependencies
+
+## [0.1.5] - 2021-03-08
+
+### Changed
+- Update `runnel` dependency
+
+## [0.1.4] - 2021-03-07
+
+### Changed
+- Use `rayon::slice::ParallelSliceMut` for parallel sorting
+- Rename `xtask/src/cmd.txt` to `xtask/src/aki-resort-cmd.txt`
+
+## [0.1.3] - 2021-03-06
+
+### Fixed
+- Excessive memory usage
+
+## [0.1.2] - 2021-03-05
+
+### Added
+- `-u, --unique` option
+- `--according-to version` option
+- `--according-to month` option
+- Extensive documentation
+
+### Changed
+- Rename `sort_key` directory to `sort`
 
 ### Removed
-* remove option: `-k, --key <keydef>`
-* remove option: `--field-separator <sep>`
+- `-k, --key <keydef>` option
+- `--field-separator <sep>` option
 
-## [0.1.1] (2021-03-03)
+## [0.1.1] - 2021-03-03
+
 ### Added
-* examples to command help
+- Usage examples to command help
 
 ### Changed
-* change option `-e, --regex` to `-e, --exp`
+- Rename `-e, --regex` option to `-e, --exp`
 
-## [0.1.0] (2021-03-01)
-* first commit
+## [0.1.0] - 2021-03-01
 
-[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.2.0..HEAD
+- Initial release
+
+[Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.2.1..HEAD
+[0.2.1]: https://github.com/aki-akaguma/aki-resort/compare/v0.2.0..v0.2.1
 [0.2.0]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.25..v0.2.0
 [0.1.25]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.24..v0.1.25
 [0.1.24]: https://github.com/aki-akaguma/aki-resort/compare/v0.1.23..v0.1.24
