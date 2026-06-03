@@ -1,5 +1,4 @@
 # Changelog: aki-resort
-
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -8,25 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- Handle fractional seconds parsing correctly in `--according-to time`
-- Correct time parsing when components (hours/minutes) are missing in `--according-to time`
+- Parse fractional seconds correctly in `--according-to time`
+- Parse time components correctly when hours or minutes are missing in `--according-to time`
 - Prevent panic in tail processing when tail size exceeds total line count
-- Ensure consistent sorting behavior with regex by placing unmatched lines at the end
-- Ensure unique flag does not skip the first empty line
+- Place unmatched lines at the end to ensure consistent sorting behavior with regex
+- Include the first empty line when using the unique flag
 - Resolve `clippy::uninlined_format_args` warnings
 
 ## [0.2.1] - 2026-05-19
 
 ### Changed
 - Support floating-point sorting using `f64` and `total_cmp` in `src/sort/numeric.rs`
-- Remove aggressive `shrink_to_fit()` in `src/run.rs` for better performance
+- Remove aggressive `shrink_to_fit()` in `src/run.rs` for performance
 - Use `String::with_capacity()` for colored output in `src/run.rs`
 - Remove unnecessary `Result` wraps in `src/sort/string.rs`
 - Update dependencies: `flood-tide` (0.2.14), `flood-tide-gen` (0.2.2), `runnel` (0.4.2), and `regex` (1.12)
 - Bump minimum supported Rust version to 1.68.0
 
 ### Fixed
-- `clippy::uninlined_format_args` and `clippy::needless_borrow` warnings
+- Resolve `clippy::uninlined_format_args` and `clippy::needless_borrow` warnings
 
 ### Removed
 - `memx-cdy` dependency
@@ -39,14 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `execute_with_env()` function
 
 ### Changed
-- `IntoIterator` compatibility for arguments in `execute()`
+- Implement `IntoIterator` compatibility for arguments in `execute()`
 - Update dependencies: `runnel` (0.4.0), `rust-version-info-file` (0.2), and `regex` (1.11)
 - Downgrade `rayon` to `1.10.*`
-- Refactor `src/run.rs` and `src/lib.rs` for better maintainability
+- Refactor `src/run.rs` and `src/lib.rs` for maintainability
 
 ### Fixed
-- Handling of cases with no matches
-- Minimum supported version in documentation
+- Handle cases with no matches
+- Correct minimum supported version in documentation
 
 ### Removed
 - `execute_env()` function
@@ -72,13 +71,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `LICENSE-APACHE` and `LICENSE-MIT` files
 - License file consistency
-- Clippy warnings: `redundant_static_lifetimes`, `needless_borrow`, `bool_assert_comparison`, `uninlined_format_args`, `unused_imports`, and `non_canonical_partial_ord_impl`
-- Minimum supported Rust version from 1.56.0 to 1.58.0
+- Resolve Clippy warnings: `redundant_static_lifetimes`, `needless_borrow`, `bool_assert_comparison`, `uninlined_format_args`, `unused_imports`, and `non_canonical_partial_ord_impl`
+- Update minimum supported Rust version from 1.56.0 to 1.58.0
 
 ## [0.1.24] - 2023-01-17
 
 ### Fixed
-- Hour parsing error when encountering empty strings
+- Correct hour parsing error when encountering empty strings
 
 ## [0.1.23] - 2023-01-11
 
@@ -91,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update dependencies: `anyhow` (1.0.68), `flood-tide` (0.2.8), `flood-tide-gen` (0.1.19), `memx-cdy` (0.1.10), `runnel` (0.3.15), `regex` (1.7.1), `rayon` (1.6.1), and `semver` (1.0.16)
 
 ### Fixed
-- Clippy warnings: `PartialEq` derivation without `Eq` implementation, and `uninlined_format_args`
+- Resolve Clippy warnings: `PartialEq` derivation without `Eq` implementation, and `uninlined_format_args`
 
 ## [0.1.22] - 2022-06-18
 
@@ -140,7 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Use `env!("CARGO_BIN_EXE_aki-resort")` for `TARGET_EXE_PATH`
 
 ### Fixed
-- Issue with `#[cfg(feature = "debian_build")]`
+- Correct issue with `#[cfg(feature = "debian_build")]`
 
 ## [0.1.16] - 2021-06-06
 
@@ -156,7 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update dependencies: `flood-tide` (0.2.2) and `regex` (1.5.4)
 
 ### Fixed
-- Bug in `-X rust-version-info` command option
+- Correct bug in `-X rust-version-info` command option
 
 ## [0.1.14] - 2021-05-03
 
@@ -167,12 +166,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update dependencies: `regex` (1.5.3)
 
 ### Fixed
-- Arithmetic overflow on i686 (1024 * 1024 * 1024 * 1024)
+- Correct arithmetic overflow on i686 (1024 * 1024 * 1024 * 1024)
 
 ## [0.1.13] - 2021-04-23
 
 ### Fixed
-- Issues in `build.rs`
+- Correct issues in `build.rs`
 
 ## [0.1.12] - 2021-04-23
 
@@ -201,7 +200,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update dependencies: `anyhow` (1.0.40)
 
 ### Fixed
-- Unwanted coloring on empty matches
+- Eliminate unwanted coloring on empty matches
 
 ## [0.1.8] - 2021-03-22
 
@@ -236,7 +235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] - 2021-03-06
 
 ### Fixed
-- Excessive memory usage
+- Correct excessive memory usage
 
 ## [0.1.2] - 2021-03-05
 
@@ -263,6 +262,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0] - 2021-03-01
 
+### Added
 - Initial release
 
 [Unreleased]: https://github.com/aki-akaguma/aki-resort/compare/v0.2.1..HEAD
